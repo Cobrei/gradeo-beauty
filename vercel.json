@@ -3,5 +3,5 @@
   "framework": "nextjs",
   "buildCommand": "node scripts/vercel-build.mjs",
   "regions": ["gru1"],
-  "crons": [{ "path": "/api/jobs/automations", "schedule": "0 * * * *" }]
+  "crons": [{ "path": "/api/jobs/automations", "schedule": "0 11 * * *" }]
 }
