@@ -20,19 +20,20 @@ function sessionId(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export async function login(email: string, password: string, userAgent?: string): Promise<{ ok: true } | { ok: false; message: string }> {
+export async function login(email: string, password: string, userAgent?: string, remember = false): Promise<{ ok: true } | { ok: false; message: string }> {
   const [user] = await db.select().from(users).where(and(eq(users.email, email.toLowerCase().trim()), isNull(users.deletedAt))).limit(1);
   // Mesmo custo de tempo com e sem usuário (evita enumeração).
   const valid = user ? await verify(user.passwordHash, password) : (await verify(await hashPassword("x"), "y"), false);
   if (!user || !valid || !user.isActive) return { ok: false, message: "E-mail ou senha incorretos." };
 
   const token = randomBytes(32).toString("base64url");
-  const expiresAt = new Date(Date.now() + SESSION_DAYS * 86400_000);
+  // Sem "manter conectado": sessão curta (12 h) e cookie que some ao fechar o navegador.
+  const expiresAt = new Date(Date.now() + (remember ? SESSION_DAYS * 86400_000 : 12 * 3600_000));
   await db.insert(sessions).values({ id: sessionId(token), tenantId: user.tenantId, userId: user.id, expiresAt, userAgent: userAgent?.slice(0, 255) });
   await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
 
   const jar = await cookies();
-  jar.set(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", expires: expiresAt });
+  jar.set(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", ...(remember ? { expires: expiresAt } : {}) });
   return { ok: true };
 }
 

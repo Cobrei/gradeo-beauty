@@ -16,7 +16,7 @@ export async function loginAction(_prev: ActionResult<unknown> | null, formData:
   const okEmail = await withinLimit(`login:email:${email.toLowerCase().trim()}`, 8, 600);
   if (!okIp || !okEmail) return { ok: false, code: "RATE_LIMIT", message: LIMIT_MSG };
   const h = await headers();
-  const r = await login(email, password, h.get("user-agent") ?? undefined);
+  const r = await login(email, password, h.get("user-agent") ?? undefined, formData.get("remember") === "on");
   if (!r.ok) return { ok: false, code: "AUTH", message: r.message };
   redirect("/painel");
 }

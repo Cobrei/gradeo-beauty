@@ -1,16 +1,15 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { BRAND } from "@/config/brand";
 import { Logo } from "@/components/ui/logo";
 import { Form } from "@/components/ui/form";
 import { Field } from "@/components/ui";
 import { getActor } from "@/modules/core/application/auth";
-import { loginAction } from "@/modules/core/ui/actions";
+import { loginAction, logoutAction } from "@/modules/core/ui/actions";
 
 export const metadata = { title: "Entrar" };
 
 export default async function LoginPage() {
-  if (await getActor()) redirect("/painel");
+  const actor = await getActor();
   return (
     <main className="flex min-h-dvh items-center justify-center bg-ink px-4">
       <div className="w-full max-w-sm">
@@ -20,6 +19,13 @@ export default async function LoginPage() {
           </h1>
           <p className="text-sm text-white/70">{BRAND.tagline}</p>
         </div>
+        {actor ? (
+          <div className="card space-y-3 text-center">
+            <p className="text-sm">Este aparelho já está conectado como <b>{actor.nickname}</b>.</p>
+            <Link href="/painel" className="btn btn-primary w-full">Continuar no sistema</Link>
+            <form action={logoutAction}><button className="btn btn-secondary w-full">Sair e entrar com outra conta</button></form>
+          </div>
+        ) : (
         <div className="card">
           <Form action={loginAction} submitLabel="Entrar">
             <>
@@ -29,9 +35,11 @@ export default async function LoginPage() {
               <Field label="Senha" name="password">
                 <input id="password" name="password" type="password" autoComplete="current-password" required className="field" />
               </Field>
+              <label className="flex items-center gap-2 text-sm text-ink-2"><input type="checkbox" name="remember" className="size-4" /> Manter conectado neste aparelho</label>
             </>
           </Form>
         </div>
+        )}
         <p className="mt-5 text-center text-sm text-white/70">
           Ainda não usa o gradeo beauty?{" "}
           <Link href="/cadastro" className="font-semibold text-white underline">

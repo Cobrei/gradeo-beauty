@@ -66,10 +66,10 @@ export default async function Home() {
           </nav>
           <div className="flex-1" />
           {logged ? (
-            <Link href="/painel" className="btn btn-primary btn-sm">Abrir o sistema</Link>
+            <Link href="/login" className="btn btn-primary btn-sm">Login</Link>
           ) : (
             <>
-              <Link href="/login" className="text-sm font-semibold text-ink-2 hover:text-brand">Entrar</Link>
+              <Link href="/login" className="text-sm font-semibold text-ink-2 hover:text-brand">Login</Link>
               <Link href="/cadastro" className="btn btn-primary btn-sm hidden sm:inline-flex">Testar grátis</Link>
             </>
           )}
