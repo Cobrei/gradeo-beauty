@@ -15,7 +15,7 @@ await page.goto(`${BASE}/login`);
 await page.fill("#email", "dona@salao.demo");
 await page.fill("#password", "gradeo123");
 await page.click("button[type=submit]");
-await page.waitForURL(`${BASE}/`);
+await page.waitForURL(`${BASE}/painel`);
 await shot("01-painel");
 (await page.textContent("body")).includes("Clientes sumidas") || fail("painel sem bloco de retenção");
 
