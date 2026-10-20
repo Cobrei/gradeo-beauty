@@ -140,3 +140,18 @@ export async function savePackage(actor: Actor, id: string | null, raw: unknown)
     return row.id;
   });
 }
+
+/** Ajuste rápido de preço e duração de vários serviços de uma vez. */
+export async function bulkUpdateServices(actor: Actor, rows: { id: string; price: string; durationMin: number }[]) {
+  assertCan(actor, "catalog.service.manage");
+  return withTenantTx(actor, async (tx, ctx) => {
+    for (const r of rows) {
+      if (!/^[0-9a-f-]{36}$/i.test(r.id)) continue;
+      const cents = toCents(String(r.price || "0"));
+      if (cents < 0) throw new DomainError("VALIDATION", "Preço inválido.");
+      const dur = Math.round(Number(r.durationMin));
+      if (!Number.isFinite(dur) || dur < 5 || dur > 600) throw new DomainError("VALIDATION", "Duração deve ficar entre 5 e 600 minutos.");
+      await tx.update(services).set({ price: fromCents(cents), durationMin: dur, ...ctx.stampUpdate() }).where(eq(services.id, r.id));
+    }
+  });
+}

@@ -4,7 +4,7 @@ export const BRAND = {
   company: "gradeo",
   product: "beauty",
   name: "gradeo beauty",
-  tagline: "Seu salão organizado, do horário marcado ao caixa fechado.",
+  tagline: "Seu salão organizado.",
   shortName: "gradeo",
   domain: "gradeo.com.br",
   supportWhatsApp: "5551993735007",

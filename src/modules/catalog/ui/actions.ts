@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireActor } from "@/modules/core/application/auth";
 import { toActionError, type ActionResult } from "@/lib/errors";
 import { toCents } from "@/lib/money";
-import { moveStock, savePackage, saveProduct, saveService } from "../application/use-cases";
+import { bulkUpdateServices, moveStock, savePackage, saveProduct, saveService } from "../application/use-cases";
 
 const on = (v: FormDataEntryValue | null) => v === "on" || v === "true" || v === "1";
 
@@ -80,4 +80,16 @@ export async function savePackageAction(_p: ActionResult<unknown> | null, fd: Fo
   }
   revalidatePath("/pacotes");
   redirect("/pacotes");
+}
+
+export async function bulkServicesAction(_p: ActionResult<unknown> | null, fd: FormData): Promise<ActionResult<unknown>> {
+  try {
+    const actor = await requireActor();
+    const ids = fd.getAll("id").map(String);
+    await bulkUpdateServices(actor, ids.map((id) => ({ id, price: String(fd.get(`price_${id}`) ?? "0"), durationMin: Number(fd.get(`dur_${id}`)) })));
+  } catch (e) {
+    return toActionError(e);
+  }
+  revalidatePath("/servicos");
+  redirect("/servicos?salvo=precos");
 }
