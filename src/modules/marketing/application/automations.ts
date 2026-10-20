@@ -5,14 +5,14 @@ import { appointments, automations, clients, messages, professionals, salonSetti
 import { withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { todayISO } from "@/lib/dates";
 import { systemActor } from "@/lib/system-actor";
-import { addDays, dateToLocal } from "@/lib/time";
+import { addDays, dateToLocal, dayRange } from "@/lib/time";
 import { formatBRDate, renderTemplate, voucherCode, voucherLabel } from "../domain/templates";
-import { providerFor } from "../infrastructure/provider";
+import { providerFor, type SalonWa } from "../infrastructure/provider";
 
-interface Ctx { actor: Actor; salonName: string; slug: string; reviewUrl: string | null; providerKind: string }
+interface Ctx { actor: Actor; salonName: string; slug: string; reviewUrl: string | null; providerKind: string; wa: SalonWa }
 
 async function enqueue(ctx: Ctx, kind: string, clientId: string, to: string, body: string, extra: { appointmentId?: string; voucherId?: string | null } = {}) {
-  const provider = providerFor(ctx.providerKind);
+  const provider = providerFor(ctx.providerKind, ctx.wa);
   await withTenantTx(ctx.actor, async (tx, t) => {
     const [m] = await tx.insert(messages).values({ ...t.stampCreate(), automationKind: kind, clientId, appointmentId: extra.appointmentId ?? null, channel: "WHATSAPP", to, body, voucherId: extra.voucherId ?? null }).returning({ id: messages.id });
     if (provider.kind !== "MANUAL") {
@@ -29,7 +29,7 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
   const [s] = await db.select().from(salonSettings).where(eq(salonSettings.tenantId, tenantId)).limit(1);
   const [t] = await db.select({ name: tenants.name }).from(tenants).where(eq(tenants.id, tenantId)).limit(1);
   if (!s || !t) return out;
-  const ctx: Ctx = { actor, salonName: t.name, slug: s.slug, reviewUrl: s.reviewUrl, providerKind: s.messageProvider };
+  const ctx: Ctx = { actor, salonName: t.name, slug: s.slug, reviewUrl: s.reviewUrl, providerKind: s.messageProvider, wa: s };
   const rules = await withTenantRead(actor, (tx) => tx.select().from(automations).where(eq(automations.enabled, true)));
   const now = new Date();
   const today = todayISO();
@@ -38,9 +38,10 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
   for (const rule of rules) {
     let n = 0;
     if (rule.kind === "REMINDER_24H") {
-      const hours = Number(rule.settings.hoursBefore ?? 24);
-      const from = new Date(now.getTime() + (hours - 1) * 3600000);
-      const to = new Date(now.getTime() + (hours + 1) * 3600000);
+      // A rotina roda uma vez por dia (8h): avisa todos os horários de agora até o fim de amanhã
+      // que ainda não receberam lembrete. Rodar mais vezes não duplica (reminderSentAt).
+      const from = new Date(now.getTime() + 60 * 60000);
+      const to = dayRange(addDays(today, 1)).end;
       const rows = await withTenantRead(actor, (tx) =>
         tx
           .select({ id: appointments.id, startsAt: appointments.startsAt, clientId: appointments.clientId, phone: clients.phone, name: clients.fullName, service: services.name, pro: professionals.name })
@@ -111,7 +112,7 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
               isNotNull(clients.phone),
               isBday
                 ? sql`${clients.birthDate} is not null and to_char(${clients.birthDate}, 'MMDD') = to_char(${today}::date, 'MMDD')`
-                : sql`${clients.lastVisitAt} = (${today}::date - ${inactiveDays}::int)`,
+                : sql`${clients.lastVisitAt} between (${today}::date - ${inactiveDays}::int - 7) and (${today}::date - ${inactiveDays}::int)`,
               sql`not exists (select 1 from mkt_messages m where m.client_id = ${sql.raw(`"crm_clients"."id"`)} and m.automation_kind = ${rule.kind} and m.created_at > now() - interval '300 days')`,
             ),
           )

@@ -58,10 +58,14 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
           <Field label="Modo" name="messageProvider">
             <select id="messageProvider" name="messageProvider" className="field" defaultValue={s.messageProvider}>
               <option value="MANUAL">Manual pelo seu WhatsApp (grátis: um toque por mensagem)</option>
-              <option value="WA_CLOUD">Automático pela API oficial do WhatsApp (Meta)</option>
+              <option value="WA_CLOUD" disabled={!s.waConnectedAt}>Automático pelo WhatsApp oficial do salão{s.waConnectedAt ? "" : " (conecte o número primeiro)"}</option>
             </select>
           </Field>
-          <p className="mt-2 text-xs text-muted">O modo automático exige uma conta WhatsApp Business API e as variáveis WHATSAPP_TOKEN e WHATSAPP_PHONE_ID no servidor. Fora da janela de 24h a Meta exige templates aprovados.</p>
+          {s.waConnectedAt ? (
+            <p className="mt-2 text-xs text-muted">Conectado: {s.waDisplayPhone ?? "número do salão"}. As mensagens saem pelo seu número e aparecem no seu WhatsApp Business.</p>
+          ) : (
+            <p className="mt-2 text-xs text-muted">Em breve: conectar o número do seu salão ao WhatsApp oficial (você continua usando o WhatsApp Business no celular). Até lá, o modo manual envia com um toque e não tem custo.</p>
+          )}
         </Card>
       </Form>
     </div>

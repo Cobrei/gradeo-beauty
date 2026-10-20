@@ -113,6 +113,7 @@ export default async function AppointmentPage({ params }: { params: Promise<{ id
                     ))}
                   </select>
                 </Field>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="force" className="h-4 w-4 accent-[#b8475f]" /> Encaixar mesmo se o horário estiver ocupado</label>
               </Form>
             </Card>
           )}

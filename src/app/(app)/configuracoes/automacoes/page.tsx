@@ -49,7 +49,7 @@ export default async function AutomacoesPage({ searchParams }: { searchParams: P
           );
         })}
       </div>
-      <p className="mt-4 text-xs text-muted">As automações rodam automaticamente de hora em hora no servidor (e você pode forçar em &quot;Gerar mensagens de hoje&quot; na fila de envio).</p>
+      <p className="mt-4 text-xs text-muted">As automações rodam sozinhas todo dia às 8h (lembretes cobrem os horários até o fim do dia seguinte) (e você pode forçar em &quot;Gerar mensagens de hoje&quot; na fila de envio).</p>
     </div>
   );
 }

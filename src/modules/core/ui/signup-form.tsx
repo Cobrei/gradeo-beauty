@@ -121,7 +121,7 @@ export function SignupForm({ segments, action }: Props) {
           </div>
           <div>
             <label className="label" htmlFor="password">Senha</label>
-            <input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" className="field" />
+            <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" className="field" />
             {errors.password && <p className="mt-1 text-xs font-semibold text-bad">{errors.password}</p>}
           </div>
         </div>

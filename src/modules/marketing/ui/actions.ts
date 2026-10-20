@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireActor } from "@/modules/core/application/auth";
 import { toActionError, type ActionResult } from "@/lib/errors";
+import { assertCan, can } from "@/lib/context";
 import { createVoucher, deleteDraft, dispatchCampaign, markManualSent, pauseCampaign, prepareCampaign, saveCampaign, setVoucherStatus } from "../application/campaigns";
 import { runAutomationsForTenant } from "../application/automations";
 import { updateAutomation } from "@/modules/core/application/settings";
@@ -122,6 +123,7 @@ export async function saveAutomationAction(_p: ActionResult<unknown> | null, fd:
 
 export async function runAutomationsNowAction() {
   const actor = await requireActor();
+  if (!can(actor, "mkt.message.send")) assertCan(actor, "mkt.campaign.manage");
   const r = await runAutomationsForTenant(actor.tenantId);
   revalidatePath("/mensagens");
   redirect(`/mensagens?rodou=${encodeURIComponent(JSON.stringify(r))}`);

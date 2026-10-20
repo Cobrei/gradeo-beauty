@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { campaigns, clients, messages, vouchers, type SegmentRule } from "@/db/schema";
-import { assertCan, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
+import { assertCan, can, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { DomainError, NotFoundError } from "@/lib/errors";
 import { fromCents, toCents, type Cents } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
@@ -143,7 +143,7 @@ export async function prepareCampaign(actor: Actor, id: string) {
 export async function dispatchCampaign(actor: Actor, id: string, batch = 40): Promise<{ sent: number; failed: number; remaining: number; manual: boolean }> {
   assertCan(actor, "mkt.campaign.manage");
   const settings = await getSettings(actor);
-  const provider = providerFor(settings.messageProvider);
+  const provider = providerFor(settings.messageProvider, settings);
   const queued = await withTenantRead(actor, (tx) => tx.select().from(messages).where(and(eq(messages.campaignId, id), eq(messages.status, "QUEUED"))).orderBy(asc(messages.createdAt)).limit(batch));
   let sent = 0;
   let failed = 0;
@@ -178,7 +178,7 @@ export async function dispatchCampaign(actor: Actor, id: string, batch = 40): Pr
 
 /** Modo manual: a dona clicou no link do WhatsApp → marca como enviada. */
 export async function markManualSent(actor: Actor, messageId: string) {
-  assertCan(actor, "mkt.campaign.manage");
+  if (!can(actor, "mkt.message.send")) assertCan(actor, "mkt.campaign.manage");
   return withTenantTx(actor, async (tx, ctx) => {
     const [m] = await tx.select().from(messages).where(eq(messages.id, messageId)).limit(1);
     if (!m || m.status !== "QUEUED") return;

@@ -84,12 +84,16 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
                   <summary className="cursor-pointer text-sm font-semibold text-brand">Acesso ao sistema</summary>
                   <div className="mt-2 space-y-3">
                     <Field label="E-mail de login" name="email"><input id="email" name="email" type="email" className="field" defaultValue={editing?.userEmail ?? ""} /></Field>
-                    <Field label={editing?.userEmail ? "Nova senha (vazio = manter)" : "Senha inicial"} name="password"><input id="password" name="password" type="password" minLength={6} className="field" autoComplete="new-password" /></Field>
-                    <Field label="Perfil" name="roleCode">
-                      <select id="roleCode" name="roleCode" className="field" defaultValue="PROFESSIONAL">
-                        {Object.entries(SYSTEM_ROLES).filter(([k]) => k !== "OWNER").map(([k, r]) => <option key={k} value={k}>{r.name}</option>)}
-                      </select>
-                    </Field>
+                    <Field label={editing?.userEmail ? "Nova senha (vazio = manter)" : "Senha inicial"} name="password"><input id="password" name="password" type="password" minLength={8} className="field" autoComplete="new-password" /></Field>
+                    {editing?.userRoleCode === "OWNER" ? (
+                      <p className="rounded-xl bg-mist px-3 py-2 text-sm"><strong>Perfil: Dona.</strong> Acesso total ao salão; este perfil não muda por aqui.</p>
+                    ) : (
+                      <Field label="Perfil" name="roleCode">
+                        <select id="roleCode" name="roleCode" className="field" defaultValue={editing?.userRoleCode ?? "PROFESSIONAL"}>
+                          {Object.entries(SYSTEM_ROLES).filter(([k]) => k !== "OWNER").map(([k, r]) => <option key={k} value={k}>{r.name}</option>)}
+                        </select>
+                      </Field>
+                    )}
                     <p className="text-xs text-muted">Profissional: vê só a própria agenda e comissões. Recepção: agenda de todas, comandas e caixa. Gerente: tudo menos configurações de conta.</p>
                   </div>
                 </details>

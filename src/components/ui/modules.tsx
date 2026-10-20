@@ -15,7 +15,7 @@ export const MODULES: Mod[] = [
   { href: "/caixa", label: "Caixa", hint: "Abertura, sangria e fechamento", color: "#2f9a78", icon: "M3 7h18v12H3zM3 11h18M7 15h3", action: "pos.cash.read" },
   { href: "/campanhas", label: "Campanhas", hint: "Traga as clientes de volta", color: "#e2577a", icon: "M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15 9a3 3 0 010 6M18 6a7 7 0 010 12", action: "mkt.campaign.manage" },
   { href: "/vouchers", label: "Vouchers", hint: "Cupons pessoais e genéricos", color: "#d4a24c", icon: "M3 8a2 2 0 002-2h14a2 2 0 002 2v2a2 2 0 000 4v2a2 2 0 00-2 2H5a2 2 0 00-2-2v-2a2 2 0 000-4zM10 6v12", action: "mkt.voucher.manage" },
-  { href: "/mensagens", label: "Mensagens", hint: "Fila de envio pelo WhatsApp", color: "#25a26b", icon: "M4 5h16v11H8l-4 4zM8 9h8M8 12h5", action: "mkt.campaign.manage" },
+  { href: "/mensagens", label: "Mensagens", hint: "Fila de envio pelo WhatsApp", color: "#25a26b", icon: "M4 5h16v11H8l-4 4zM8 9h8M8 12h5", anyOf: ["mkt.message.send", "mkt.campaign.manage"] },
   { href: "/comissoes", label: "Comissões", hint: "Por profissional e período", color: "#3f7fbf", icon: "M12 3v18M16 7H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H7", anyOf: ["commission.read_all", "commission.read_own"] },
   { href: "/relatorios", label: "Relatórios", hint: "Faturamento, ticket e retenção", color: "#5b6fb5", icon: "M4 20V10M10 20V4M16 20v-7M22 20H2", action: "report.read" },
   { href: "/servicos", label: "Serviços", hint: "Preço, tempo e ciclo de retorno", color: "#c25b8a", icon: "M6 6a3 3 0 106 0 3 3 0 00-6 0zM6 18a3 3 0 106 0 3 3 0 00-6 0zM11 8l9 10M11 16l9-10", action: "catalog.service.manage" },

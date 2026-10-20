@@ -57,7 +57,7 @@ export async function rescheduleAction(_p: ActionResult<unknown> | null, fd: For
   const date = String(fd.get("date"));
   try {
     const actor = await requireActor();
-    await rescheduleAppointment(actor, id, { date, time: String(fd.get("time")), professionalId: (fd.get("professionalId") as string) || undefined });
+    await rescheduleAppointment(actor, id, { date, time: String(fd.get("time")), professionalId: (fd.get("professionalId") as string) || undefined, force: fd.get("force") === "on" });
   } catch (e) {
     return toActionError(e);
   }

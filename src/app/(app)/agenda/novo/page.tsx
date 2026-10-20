@@ -73,7 +73,6 @@ export default async function NovoAgendamento({ searchParams }: { searchParams: 
 
         <Card title="2. Serviço e horário" className="md:col-span-3">
           <Form action={createAppointmentAction} submitLabel="Confirmar agendamento">
-            <input type="hidden" name="date" value={date} />
             <input type="hidden" name="clientId" value={chosen?.id ?? ""} />
             {sp.return && <input type="hidden" name="return" value={sp.return} />}
             {!chosen && (
@@ -104,8 +103,8 @@ export default async function NovoAgendamento({ searchParams }: { searchParams: 
                   ))}
                 </select>
               </Field>
-              <Field label="Data" name="d2">
-                <input id="d2" type="date" defaultValue={date} className="field" form="refiltro" name="d" />
+              <Field label="Data" name="date">
+                <input id="d2" type="date" defaultValue={date} className="field" name="date" required />
               </Field>
               <Field label="Hora" name="time">
                 <input id="time" name="time" type="time" required className="field" defaultValue={sp.t ?? slots[0] ?? ""} step={300} />
@@ -168,6 +167,10 @@ export default async function NovoAgendamento({ searchParams }: { searchParams: 
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
+            </label>
+            <label className="text-xs text-muted">
+              Dia
+              <input type="date" name="d" defaultValue={date} className="field min-h-9 py-1 text-sm" />
             </label>
             <button className="btn btn-secondary btn-sm">Ver horários livres</button>
           </form>

@@ -48,10 +48,14 @@ export const settingsSchema = z.object({
 export async function updateSettings(actor: Actor, raw: unknown) {
   assertCan(actor, "core.settings.manage");
   const input = settingsSchema.parse(raw);
+  // endereço do link é único no sistema todo: consulta de sistema, fora do salão
+  const [other] = await db.select({ tenantId: salonSettings.tenantId }).from(salonSettings).where(eq(salonSettings.slug, input.slug)).limit(1);
+  if (other && other.tenantId !== actor.tenantId) throw new DomainError("SLUG_TAKEN", "Este endereço já está em uso.");
   return withTenantTx(actor, async (tx, ctx) => {
-    const [other] = await tx.select({ tenantId: salonSettings.tenantId }).from(salonSettings).where(eq(salonSettings.slug, input.slug)).limit(1);
-    // RLS só mostra o próprio tenant; unicidade global é garantida pelo índice único (erro tratado abaixo).
-    if (other && other.tenantId !== actor.tenantId) throw new DomainError("SLUG_TAKEN", "Este endereço já está em uso.");
+    if (input.messageProvider === "WA_CLOUD") {
+      const [cur] = await tx.select({ c: salonSettings.waConnectedAt }).from(salonSettings).where(eq(salonSettings.tenantId, actor.tenantId)).limit(1);
+      if (!cur?.c) throw new DomainError("WA_NOT_CONNECTED", "Conecte o WhatsApp do salão antes de ligar o envio automático.");
+    }
     await tx.update(tenants).set({ name: input.salonName, updatedAt: new Date() }).where(eq(tenants.id, actor.tenantId));
     try {
       await tx

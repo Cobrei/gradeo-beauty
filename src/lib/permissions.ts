@@ -36,6 +36,7 @@ export const ACTIONS = {
   "commission.close": "Fechar período de comissões",
   // marketing
   "mkt.campaign.manage": "Criar e disparar campanhas",
+  "mkt.message.send": "Enviar a fila de mensagens (lembretes, aniversários) pelo WhatsApp",
   "mkt.voucher.manage": "Criar vouchers",
   "mkt.voucher.redeem": "Resgatar voucher na comanda",
   // relatórios
@@ -53,7 +54,7 @@ export const SYSTEM_ROLES: Record<string, { name: string; permissions: Action[] 
       "crm.client.read", "crm.client.write", "crm.client.import", "crm.note.write",
       "agenda.appointment.read", "agenda.appointment.write", "agenda.block.write",
       "pos.order.read", "pos.order.write", "pos.order.discount", "pos.order.cancel", "pos.cash.manage", "pos.cash.read",
-      "commission.read_all", "commission.close", "mkt.campaign.manage", "mkt.voucher.manage", "mkt.voucher.redeem", "report.read",
+      "commission.read_all", "commission.close", "mkt.campaign.manage", "mkt.message.send", "mkt.voucher.manage", "mkt.voucher.redeem", "report.read",
     ],
   },
   RECEPTION: {
@@ -61,7 +62,7 @@ export const SYSTEM_ROLES: Record<string, { name: string; permissions: Action[] 
     permissions: [
       "catalog.product.read", "crm.client.read", "crm.client.write", "crm.note.write",
       "agenda.appointment.read", "agenda.appointment.write", "agenda.block.write",
-      "pos.order.read", "pos.order.write", "pos.cash.manage", "pos.cash.read", "mkt.voucher.redeem",
+      "pos.order.read", "pos.order.write", "pos.cash.manage", "pos.cash.read", "mkt.voucher.redeem", "mkt.message.send",
     ],
   },
   PROFESSIONAL: {

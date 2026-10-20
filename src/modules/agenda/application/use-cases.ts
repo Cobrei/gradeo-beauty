@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq, gte, inArray, isNull, lt, lte, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
-import { db } from "@/db/client";
+import type { Tx } from "@/db/client";
 import { agendaBlocks, appointments, clients, professionals, salonSettings, services, waitlist } from "@/db/schema";
 import { assertCan, can, withTenant, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { DomainError, NotFoundError } from "@/lib/errors";
@@ -105,6 +105,23 @@ export async function availableSlots(tenantId: string, dateISO: string, professi
   });
 }
 
+/**
+ * Atendimentos e bloqueios que se sobrepõem ao intervalo. Trava o profissional até o fim da
+ * transação para que dois pedidos simultâneos não peguem o mesmo horário.
+ */
+async function conflictsFor(tx: Tx, professionalId: string, startsAt: Date, endsAt: Date, excludeId?: string) {
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${professionalId}))`);
+  const appts = await tx
+    .select({ id: appointments.id, startsAt: appointments.startsAt, endsAt: appointments.endsAt })
+    .from(appointments)
+    .where(and(isNull(appointments.deletedAt), eq(appointments.professionalId, professionalId), lt(appointments.startsAt, endsAt), gte(appointments.endsAt, startsAt), inArray(appointments.status, ["REQUESTED", "SCHEDULED", "CONFIRMED", "IN_SERVICE"]), excludeId ? ne(appointments.id, excludeId) : undefined));
+  const blocks = await tx
+    .select({ id: agendaBlocks.id, startsAt: agendaBlocks.startsAt, endsAt: agendaBlocks.endsAt })
+    .from(agendaBlocks)
+    .where(and(isNull(agendaBlocks.deletedAt), or(eq(agendaBlocks.professionalId, professionalId), isNull(agendaBlocks.professionalId)), lt(agendaBlocks.startsAt, endsAt), gte(agendaBlocks.endsAt, startsAt)));
+  return [...appts, ...blocks].filter((c) => overlaps(startsAt, endsAt, c.startsAt, c.endsAt));
+}
+
 export const appointmentSchema = z.object({
   clientId: z.string().uuid().optional().or(z.literal("")),
   walkInName: z.string().trim().max(120).optional(),
@@ -148,12 +165,8 @@ export async function createAppointment(actor: Actor, raw: unknown): Promise<{ i
     }
     if (!clientId && !walkInName) throw new DomainError("VALIDATION", "Escolha a cliente ou informe um nome.", { clientId: "Obrigatório" });
 
-    const clash = await tx
-      .select({ id: appointments.id, startsAt: appointments.startsAt, endsAt: appointments.endsAt })
-      .from(appointments)
-      .where(and(isNull(appointments.deletedAt), eq(appointments.professionalId, i.professionalId), lt(appointments.startsAt, endsAt), gte(appointments.endsAt, startsAt), inArray(appointments.status, ["REQUESTED", "SCHEDULED", "CONFIRMED", "IN_SERVICE"])));
-    const real = clash.filter((c) => overlaps(startsAt, endsAt, c.startsAt, c.endsAt));
-    if (real.length && !i.force) throw new DomainError("CONFLICT", `${pro.name} já tem atendimento nesse horário. Marque "encaixar mesmo assim" para forçar.`);
+    const real = await conflictsFor(tx, i.professionalId, startsAt, endsAt);
+    if (real.length && !i.force) throw new DomainError("CONFLICT", `${pro.name} já tem atendimento ou bloqueio nesse horário. Marque "encaixar mesmo assim" para forçar.`);
 
     const price = i.price !== undefined && i.price !== "" ? fromCents(toCents(String(i.price))) : sv.price;
     const [row] = await tx
@@ -165,7 +178,7 @@ export async function createAppointment(actor: Actor, raw: unknown): Promise<{ i
   });
 }
 
-export async function rescheduleAppointment(actor: Actor, id: string, input: { date: string; time: string; professionalId?: string }) {
+export async function rescheduleAppointment(actor: Actor, id: string, input: { date: string; time: string; professionalId?: string; force?: boolean }) {
   assertCan(actor, "agenda.appointment.write");
   return withTenantTx(actor, async (tx, ctx) => {
     const [a] = await tx.select().from(appointments).where(eq(appointments.id, id)).limit(1);
@@ -174,6 +187,11 @@ export async function rescheduleAppointment(actor: Actor, id: string, input: { d
     const dur = (a.endsAt.getTime() - a.startsAt.getTime()) / 60000;
     const startsAt = localToDate(input.date, input.time);
     const endsAt = addMinutes(startsAt, dur);
+    const proId = input.professionalId ?? a.professionalId;
+    const [pro] = await tx.select({ id: professionals.id, name: professionals.name }).from(professionals).where(eq(professionals.id, proId)).limit(1);
+    if (!pro) throw new NotFoundError("professional", proId);
+    const real = await conflictsFor(tx, proId, startsAt, endsAt, id);
+    if (real.length && !input.force) throw new DomainError("CONFLICT", `${pro.name} já tem atendimento ou bloqueio nesse horário.`);
     await tx.update(appointments).set({ startsAt, endsAt, professionalId: input.professionalId ?? a.professionalId, reminderSentAt: null, ...ctx.stampUpdate() }).where(eq(appointments.id, id));
     await ctx.audit("appointment", id, "update", { startsAt: a.startsAt }, { startsAt });
   });

@@ -16,12 +16,16 @@ export class ManualProvider implements MessageProvider {
   }
 }
 
-/** WhatsApp Cloud API (Meta). Envia texto livre dentro da janela de 24h; fora dela a Meta exige template aprovado. */
+/**
+ * WhatsApp Cloud API (Meta) pelo número do PRÓPRIO salão. Não existe número global: sem a conexão
+ * do salão, nada é enviado automaticamente. Texto livre só dentro da janela de 24h; fora dela a Meta
+ * exige template aprovado (próxima etapa).
+ */
 export class WaCloudProvider implements MessageProvider {
   readonly kind = "WA_CLOUD" as const;
-  constructor(private token = process.env.WHATSAPP_TOKEN ?? "", private phoneId = process.env.WHATSAPP_PHONE_ID ?? "") {}
+  constructor(private token: string, private phoneId: string) {}
   async send(to: string, body: string): Promise<SendResult> {
-    if (!this.token || !this.phoneId) return { ok: false, error: "WHATSAPP_TOKEN/WHATSAPP_PHONE_ID não configurados" };
+    if (!this.token || !this.phoneId) return { ok: false, error: "WhatsApp do salão não conectado" };
     try {
       const res = await fetch(`https://graph.facebook.com/v21.0/${this.phoneId}/messages`, {
         method: "POST",
@@ -45,8 +49,10 @@ export class LogProvider implements MessageProvider {
   }
 }
 
-export function providerFor(kind: string): MessageProvider {
-  if (kind === "WA_CLOUD") return new WaCloudProvider();
+export interface SalonWa { waAccessToken?: string | null; waPhoneNumberId?: string | null; waConnectedAt?: Date | null }
+
+export function providerFor(kind: string, salon?: SalonWa): MessageProvider {
+  if (kind === "WA_CLOUD" && salon?.waConnectedAt && salon.waAccessToken && salon.waPhoneNumberId) return new WaCloudProvider(salon.waAccessToken, salon.waPhoneNumberId);
   if (process.env.MESSAGE_PROVIDER === "LOG") return new LogProvider();
   return new ManualProvider();
 }

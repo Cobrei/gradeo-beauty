@@ -62,6 +62,12 @@ export async function closeCommission(actor: Actor, professionalId: string, from
   if (line.closed) throw new DomainError("CLOSED", "Período já fechado para esta profissional.");
   const items = await commissionDetail(actor, professionalId, from, to);
   return withTenantTx(actor, async (tx, ctx) => {
+    const [overlap] = await tx
+      .select({ fromDate: commissionClosings.fromDate, toDate: commissionClosings.toDate })
+      .from(commissionClosings)
+      .where(and(eq(commissionClosings.professionalId, professionalId), lte(commissionClosings.fromDate, to), gte(commissionClosings.toDate, from)))
+      .limit(1);
+    if (overlap) throw new DomainError("OVERLAP", `Já existe fechamento de ${overlap.fromDate.split("-").reverse().join("/")} a ${overlap.toDate.split("-").reverse().join("/")} que cobre parte deste período. Feche só os dias que faltam.`);
     await tx.insert(commissionClosings).values({ ...ctx.stampCreate(), professionalId, fromDate: from, toDate: to, servicesTotal: fromCents(line.services), productsTotal: fromCents(line.products), commissionTotal: fromCents(line.commission + adjustments), adjustments: fromCents(adjustments), itemsJson: items });
   });
 }

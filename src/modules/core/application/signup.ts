@@ -15,7 +15,7 @@ export const signupSchema = z.object({
   ownerName: z.string().trim().min(2, "Informe seu nome.").max(120),
   email: z.string().trim().toLowerCase().email("E-mail inválido."),
   phone: z.string().trim().min(10, "Informe o WhatsApp com DDD."),
-  password: z.string().min(6, "Senha com pelo menos 6 caracteres."),
+  password: z.string().min(8, "Senha com pelo menos 8 caracteres."),
   serviceNames: z.array(z.string()).default([]),
   professionals: z.array(z.string().trim().min(1)).max(30).default([]),
 });

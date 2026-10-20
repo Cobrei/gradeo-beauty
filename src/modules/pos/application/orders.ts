@@ -119,7 +119,8 @@ export async function addItem(actor: Actor, orderId: string, input: AddItemInput
       if (!pk) throw new NotFoundError("package");
       description = `Pacote: ${pk.name}`;
       if (input.unitPrice === undefined) unitPrice = c(pk.price);
-      commissionPct = Number(pro?.commissionPct ?? 0);
+      // a venda do pacote não comissiona: a comissão sai em cada sessão usada (evita pagar duas vezes)
+      commissionPct = 0;
     }
     const total = Math.max(unitPrice * qty - discount, 0);
     const commissionAmount = pct(paidWithCreditId ? unitPrice * qty : total, commissionPct);
@@ -201,6 +202,17 @@ export async function removeVoucher(actor: Actor, orderId: string) {
 export async function payOrder(actor: Actor, orderId: string, pays: { method: string; amount: Cents; installments?: number }[]) {
   assertCan(actor, "pos.order.write");
   return withTenantTx(actor, async (tx, ctx) => {
+    // trava a comanda: duplo clique, duas abas ou nova tentativa não cobram duas vezes
+    const [locked] = await tx.select({ status: orders.status, voucherId: orders.voucherId }).from(orders).where(eq(orders.id, orderId)).for("update").limit(1);
+    if (!locked) throw new NotFoundError("order", orderId);
+    if (locked.status !== "OPEN") throw new DomainError("ALREADY_PAID", "Esta comanda já foi recebida ou cancelada.");
+    if (locked.voucherId) {
+      const [v] = await tx.select().from(vouchers).where(eq(vouchers.id, locked.voucherId)).for("update").limit(1);
+      const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+      if (!v || v.status !== "ACTIVE" || v.uses >= v.maxUses || v.validUntil < today) {
+        throw new DomainError("VOUCHER_INVALID", "O voucher desta comanda não vale mais (vencido, pausado ou já usado). Remova o voucher para receber.");
+      }
+    }
     const t = await recalc(tx, ctx, orderId);
     const [o] = await tx.select().from(orders).where(eq(orders.id, orderId)).limit(1);
     const items = await tx.select().from(orderItems).where(and(eq(orderItems.orderId, orderId), isNull(orderItems.deletedAt)));
@@ -238,7 +250,7 @@ export async function payOrder(actor: Actor, orderId: string, pays: { method: st
       await tx.update(vouchers).set({ uses: sql`${vouchers.uses} + 1` }).where(eq(vouchers.id, o.voucherId));
       await tx.insert(voucherRedemptions).values({ ...ctx.stampCreate(), voucherId: o.voucherId, orderId, clientId: o.clientId, discount: fromCents(t.voucher), orderTotal: fromCents(t.total) });
     }
-    await tx.update(orders).set({ status: "PAID", paidAt: now, cashSessionId: session?.id ?? o.cashSessionId, ...ctx.stampUpdate() }).where(eq(orders.id, orderId));
+    await tx.update(orders).set({ status: "PAID", paidAt: now, cashSessionId: session?.id ?? o.cashSessionId, ...ctx.stampUpdate() }).where(and(eq(orders.id, orderId), eq(orders.status, "OPEN")));
     // métricas da cliente
     if (o.clientId) {
       const hasService = items.some((i) => i.kind === "SERVICE");
@@ -353,6 +365,9 @@ export async function addCashMove(actor: Actor, sessionId: string, kind: "IN" | 
   if (amount <= 0) throw new DomainError("VALIDATION", "Valor deve ser maior que zero.");
   if (!description.trim()) throw new DomainError("VALIDATION", "Descreva o lançamento.");
   return withTenantTx(actor, async (tx, ctx) => {
+    const [cs] = await tx.select({ closedAt: cashSessions.closedAt }).from(cashSessions).where(eq(cashSessions.id, sessionId)).limit(1);
+    if (!cs) throw new NotFoundError("cash_session", sessionId);
+    if (cs.closedAt) throw new DomainError("CASH_CLOSED", "Este caixa já foi fechado.");
     await tx.insert(cashMoves).values({ ...ctx.stampCreate(), sessionId, kind, amount: fromCents(amount), description: description.trim() });
   });
 }
@@ -361,6 +376,9 @@ export async function closeCashSession(actor: Actor, sessionId: string, closingA
   assertCan(actor, "pos.cash.manage");
   const summary = await cashSummary(actor, sessionId);
   return withTenantTx(actor, async (tx, ctx) => {
+    const [cs] = await tx.select({ closedAt: cashSessions.closedAt }).from(cashSessions).where(eq(cashSessions.id, sessionId)).for("update").limit(1);
+    if (!cs) throw new NotFoundError("cash_session", sessionId);
+    if (cs.closedAt) throw new DomainError("CASH_CLOSED", "Este caixa já foi fechado.");
     const openOrders = await tx.select({ n: sql<number>`count(*)::int` }).from(orders).where(and(eq(orders.status, "OPEN"), eq(orders.serviceDate, todayISO())));
     await tx
       .update(cashSessions)

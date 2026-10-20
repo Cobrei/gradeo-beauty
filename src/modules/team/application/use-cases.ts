@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
+import { db } from "@/db/client";
 import { professionals, roles, userRoles, users, type OpeningHours } from "@/db/schema";
 import { assertCan, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { DomainError, NotFoundError } from "@/lib/errors";
@@ -20,7 +21,7 @@ export const professionalSchema = z.object({
   workingHours: z.record(z.string(), z.object({ open: z.string(), close: z.string() }).nullable()).default({}),
   // acesso ao sistema (opcional)
   email: z.string().trim().toLowerCase().email().optional().or(z.literal("")),
-  password: z.string().min(6).optional().or(z.literal("")),
+  password: z.string().min(8, "A senha precisa ter pelo menos 8 caracteres.").optional().or(z.literal("")),
   roleCode: z.enum(["PROFESSIONAL", "RECEPTION", "MANAGER", "FINANCE"]).default("PROFESSIONAL"),
 });
 
@@ -39,7 +40,10 @@ export async function getProfessional(actor: Actor, id: string) {
     const [p] = await tx.select().from(professionals).where(eq(professionals.id, id)).limit(1);
     if (!p) throw new NotFoundError("professional", id);
     const user = p.userId ? (await tx.select({ email: users.email, isActive: users.isActive }).from(users).where(eq(users.id, p.userId)).limit(1))[0] : null;
-    return { ...p, userEmail: user?.email ?? null };
+    const role = p.userId
+      ? (await tx.select({ code: roles.code }).from(userRoles).innerJoin(roles, eq(roles.id, userRoles.roleId)).where(and(eq(userRoles.userId, p.userId), isNull(userRoles.deletedAt))).limit(1))[0]
+      : null;
+    return { ...p, userEmail: user?.email ?? null, userRoleCode: role?.code ?? null };
   });
 }
 
@@ -82,11 +86,18 @@ export async function saveProfessional(actor: Actor, id: string | null, raw: unk
     // Acesso ao sistema
     if (i.email) {
       assertCan(actor, "core.user.manage");
+      // e-mail é o login: único em todo o sistema (consulta de sistema, fora do salão)
+      const [dup] = await db.select({ id: users.id }).from(users).where(and(eq(users.email, i.email), isNull(users.deletedAt))).limit(1);
+      if (dup && dup.id !== userId) throw new DomainError("EMAIL_TAKEN", "Este e-mail já é usado para entrar em outra conta. Use outro e-mail.");
       const [role] = await tx.select({ id: roles.id }).from(roles).where(eq(roles.code, i.roleCode)).limit(1);
       if (!role) throw new DomainError("NO_ROLE", "Papel não encontrado.");
       if (userId) {
-        await tx.update(users).set({ email: i.email, name: i.name, isActive: i.isActive, ...(i.password ? { passwordHash: await hashPassword(i.password) } : {}), ...ctx.stampUpdate() }).where(eq(users.id, userId));
-        await tx.update(userRoles).set({ roleId: role.id, ...ctx.stampUpdate() }).where(eq(userRoles.userId, userId));
+        const [current] = await tx.select({ code: roles.code }).from(userRoles).innerJoin(roles, eq(roles.id, userRoles.roleId)).where(and(eq(userRoles.userId, userId), isNull(userRoles.deletedAt))).limit(1);
+        const isOwner = current?.code === "OWNER";
+        if (isOwner && !i.isActive) throw new DomainError("OWNER_LOCKED", "A dona do salão não pode ser desativada.");
+        await tx.update(users).set({ email: i.email, name: i.name, isActive: isOwner ? true : i.isActive, ...(i.password ? { passwordHash: await hashPassword(i.password) } : {}), ...ctx.stampUpdate() }).where(eq(users.id, userId));
+        // o perfil da dona nunca muda por esta tela; os demais só mudam quando o campo muda
+        if (!isOwner && current?.code !== i.roleCode) await tx.update(userRoles).set({ roleId: role.id, ...ctx.stampUpdate() }).where(eq(userRoles.userId, userId));
       } else {
         if (!i.password) throw new DomainError("VALIDATION", "Defina uma senha inicial para criar o acesso.");
         const [u] = await tx.insert(users).values({ ...ctx.stampCreate(), name: i.name, email: i.email, passwordHash: await hashPassword(i.password), isActive: i.isActive }).returning({ id: users.id });
@@ -94,6 +105,8 @@ export async function saveProfessional(actor: Actor, id: string | null, raw: unk
         await tx.update(professionals).set({ userId: u.id }).where(eq(professionals.id, profId));
       }
     } else if (userId && !i.isActive) {
+      const [current] = await tx.select({ code: roles.code }).from(userRoles).innerJoin(roles, eq(roles.id, userRoles.roleId)).where(and(eq(userRoles.userId, userId), isNull(userRoles.deletedAt))).limit(1);
+      if (current?.code === "OWNER") throw new DomainError("OWNER_LOCKED", "A dona do salão não pode ser desativada.");
       await tx.update(users).set({ isActive: false, ...ctx.stampUpdate() }).where(eq(users.id, userId));
     }
     return profId;

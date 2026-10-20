@@ -1,4 +1,4 @@
-import { boolean, index, integer, jsonb, numeric, pgTable, text, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { baseCols } from "./_common";
 
 /** Horário de funcionamento: 0=domingo..6=sábado. */
@@ -22,6 +22,12 @@ export const salonSettings = pgTable(
     reviewUrl: text("review_url"),
     messageProvider: varchar("message_provider", { length: 16 }).notNull().default("MANUAL"), // MANUAL, WA_CLOUD
     messageSenderName: varchar("message_sender_name", { length: 60 }),
+    // WhatsApp oficial do próprio salão (preenchido pela conexão com a Meta; nunca digitado à mão)
+    waPhoneNumberId: varchar("wa_phone_number_id", { length: 40 }),
+    waBusinessAccountId: varchar("wa_business_account_id", { length: 40 }),
+    waAccessToken: text("wa_access_token"),
+    waDisplayPhone: varchar("wa_display_phone", { length: 20 }),
+    waConnectedAt: timestamp("wa_connected_at", { withTimezone: true }),
     onboardingDone: boolean("onboarding_done").notNull().default(false),
   },
   (t) => [uniqueIndex("uq_settings_tenant").on(t.tenantId), uniqueIndex("uq_settings_slug").on(t.slug)],

@@ -6,7 +6,7 @@ import { pendingManualMessages } from "@/modules/marketing/application/automatio
 import { markSentAction, runAutomationsNowAction } from "@/modules/marketing/ui/actions";
 import { formatDateTime } from "@/lib/time";
 import { formatPhone } from "@/lib/phone";
-import { can } from "@/lib/context";
+import { assertCan, can } from "@/lib/context";
 
 export const metadata = { title: "Fila de envio" };
 
@@ -14,6 +14,7 @@ const KIND: Record<string, string> = { REMINDER_24H: "Lembrete", THANKS: "Pós-a
 
 export default async function MensagensPage({ searchParams }: { searchParams: Promise<{ rodou?: string }> }) {
   const actor = await requireActor();
+  if (!can(actor, "mkt.message.send")) assertCan(actor, "mkt.campaign.manage");
   const sp = await searchParams;
   const [rows, settings] = await Promise.all([pendingManualMessages(actor), getSettings(actor)]);
   return (
@@ -21,7 +22,7 @@ export default async function MensagensPage({ searchParams }: { searchParams: Pr
       <PageHeader
         title="Fila de envio"
         subtitle={settings.messageProvider === "MANUAL" ? "As automações preparam as mensagens; você envia com um toque (abre o WhatsApp já com o texto)." : "Envio automático pela API do WhatsApp. Aqui ficam só as que falharam."}
-        action={can(actor, "core.settings.manage") ? <><Link href="/configuracoes/automacoes" className="btn btn-secondary btn-sm">Automações</Link><form action={runAutomationsNowAction}><button className="btn btn-primary btn-sm">Gerar mensagens de hoje</button></form></> : undefined}
+        action={<>{can(actor, "core.settings.manage") && <Link href="/configuracoes/automacoes" className="btn btn-secondary btn-sm">Automações</Link>}<form action={runAutomationsNowAction}><button className="btn btn-primary btn-sm">Gerar mensagens de hoje</button></form></>}
       />
       {sp.rodou && <div className="mb-4"><Notice tone="ok">Automações executadas: {Object.entries(JSON.parse(sp.rodou) as Record<string, number>).map(([k, v]) => `${KIND[k] ?? k}: ${v}`).join(" · ") || "nada novo hoje"}</Notice></div>}
       {rows.length === 0 ? (
