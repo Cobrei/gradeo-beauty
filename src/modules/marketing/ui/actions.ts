@@ -6,7 +6,8 @@ import { toActionError, type ActionResult } from "@/lib/errors";
 import { assertCan, can } from "@/lib/context";
 import { parseReais } from "@/lib/money";
 import { createVoucher, deleteDraft, dispatchCampaign, markManualSent, pauseCampaign, prepareCampaign, saveCampaign, setVoucherStatus } from "../application/campaigns";
-import { runAutomationsForTenant } from "../application/automations";
+import { flushAutomationQueue, runAutomationsForTenant } from "../application/automations";
+import { setSendDeadline } from "../infrastructure/provider";
 import { updateAutomation } from "@/modules/core/application/settings";
 
 export async function saveCampaignAction(_p: ActionResult<unknown> | null, fd: FormData): Promise<ActionResult<unknown>> {
@@ -125,7 +126,18 @@ export async function saveAutomationAction(_p: ActionResult<unknown> | null, fd:
 export async function runAutomationsNowAction() {
   const actor = await requireActor();
   if (!can(actor, "mkt.message.send")) assertCan(actor, "mkt.campaign.manage");
+  setSendDeadline(45_000);
   const r = await runAutomationsForTenant(actor.tenantId);
   revalidatePath("/mensagens");
   redirect(`/mensagens?rodou=${encodeURIComponent(JSON.stringify(r))}`);
+}
+
+/** Envia agora, pelo WhatsApp conectado do salão, o que está na fila. */
+export async function flushQueueAction() {
+  const actor = await requireActor();
+  if (!can(actor, "mkt.message.send")) assertCan(actor, "mkt.campaign.manage");
+  setSendDeadline(45_000);
+  const r = await flushAutomationQueue(actor);
+  revalidatePath("/mensagens");
+  redirect(`/mensagens?enviou=${r.sent}&falhou=${r.failed}&resta=${r.remaining}`);
 }

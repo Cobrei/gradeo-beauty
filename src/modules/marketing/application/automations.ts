@@ -1,6 +1,6 @@
 import { appUrl } from "@/lib/app-url";
 import "server-only";
-import { and, eq, gte, inArray, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { appointments, automations, clients, messages, professionals, salonSettings, services, tenants, vouchers } from "@/db/schema";
 import { withTenantRead, withTenantTx, type Actor } from "@/lib/context";
@@ -8,19 +8,53 @@ import { todayISO } from "@/lib/dates";
 import { systemActor } from "@/lib/system-actor";
 import { addDays, dateToLocal, dayRange } from "@/lib/time";
 import { formatBRDate, renderTemplate, voucherCode, voucherLabel } from "../domain/templates";
-import { providerFor, type SalonWa } from "../infrastructure/provider";
+import { humanPause, pastDeadline, providerFor, QR_BATCH, setSendDeadline, type SalonWa } from "../infrastructure/provider";
 
-interface Ctx { actor: Actor; salonName: string; slug: string; reviewUrl: string | null; providerKind: string; wa: SalonWa }
+interface Ctx { actor: Actor; salonName: string; slug: string; reviewUrl: string | null; providerKind: string; wa: SalonWa; sent: number }
 
 async function enqueue(ctx: Ctx, kind: string, clientId: string, to: string, body: string, extra: { appointmentId?: string; voucherId?: string | null } = {}) {
   const provider = providerFor(ctx.providerKind, ctx.wa);
-  await withTenantTx(ctx.actor, async (tx, t) => {
+  const id = await withTenantTx(ctx.actor, async (tx, t) => {
     const [m] = await tx.insert(messages).values({ ...t.stampCreate(), automationKind: kind, clientId, appointmentId: extra.appointmentId ?? null, channel: "WHATSAPP", to, body, voucherId: extra.voucherId ?? null }).returning({ id: messages.id });
-    if (provider.kind !== "MANUAL") {
-      const r = await provider.send(to, body);
-      await tx.update(messages).set(r.ok ? { status: "SENT", sentAt: new Date(), providerId: r.providerId ?? null } : { status: "FAILED", error: r.error?.slice(0, 255) ?? "erro" }).where(eq(messages.id, m.id));
-    }
+    return m.id;
   });
+  if (provider.kind === "MANUAL") return;
+  // QR code: envia aos poucos, com pausa; o que passar do lote fica na fila para a próxima rodada
+  if (provider.kind === "WA_QR") {
+    if (ctx.sent >= QR_BATCH || pastDeadline()) return;
+    if (ctx.sent > 0) await humanPause();
+  }
+  ctx.sent++;
+  const r = await provider.send(to, body);
+  await withTenantTx(ctx.actor, (tx) => tx.update(messages).set(r.ok ? { status: "SENT", sentAt: new Date(), providerId: r.providerId ?? null } : { status: "FAILED", error: r.error?.slice(0, 255) ?? "erro" }).where(eq(messages.id, id)));
+}
+
+/**
+ * Envia automaticamente o que ficou na fila (automações, sem campanha) quando o salão tem WhatsApp
+ * conectado. No QR code vai em lotes pequenos com pausa entre mensagens.
+ */
+export async function flushAutomationQueue(actor: Actor, already = 0): Promise<{ sent: number; failed: number; remaining: number }> {
+  const [s] = await db.select().from(salonSettings).where(eq(salonSettings.tenantId, actor.tenantId)).limit(1);
+  if (!s) return { sent: 0, failed: 0, remaining: 0 };
+  const provider = providerFor(s.messageProvider, s);
+  if (provider.kind === "MANUAL") return { sent: 0, failed: 0, remaining: 0 };
+  const cap = Math.max(0, (provider.kind === "WA_QR" ? QR_BATCH : 40) - already);
+  const queued = cap ? await withTenantRead(actor, (tx) => tx.select().from(messages).where(and(eq(messages.status, "QUEUED"), isNull(messages.campaignId))).orderBy(asc(messages.createdAt)).limit(cap)) : [];
+  let sent = 0;
+  let failed = 0;
+  for (const [i, m] of queued.entries()) {
+    if (pastDeadline()) break;
+    if (provider.kind === "WA_QR" && (i > 0 || already > 0)) await humanPause();
+    const r = await provider.send(m.to, m.body);
+    await withTenantTx(actor, (tx) => tx.update(messages).set(r.ok ? { status: "SENT", sentAt: new Date(), providerId: r.providerId ?? null } : { status: "FAILED", error: r.error?.slice(0, 255) ?? "erro" }).where(eq(messages.id, m.id)));
+    if (r.ok) sent++;
+    else failed++;
+  }
+  const remaining = await withTenantRead(actor, async (tx) => {
+    const [r] = await tx.select({ n: sql<number>`count(*)::int` }).from(messages).where(and(eq(messages.status, "QUEUED"), isNull(messages.campaignId)));
+    return r.n;
+  });
+  return { sent, failed, remaining };
 }
 
 /** Roda todas as automações ativas de um salão. Idempotente: marca o que já mandou. */
@@ -30,7 +64,7 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
   const [s] = await db.select().from(salonSettings).where(eq(salonSettings.tenantId, tenantId)).limit(1);
   const [t] = await db.select({ name: tenants.name }).from(tenants).where(eq(tenants.id, tenantId)).limit(1);
   if (!s || !t) return out;
-  const ctx: Ctx = { actor, salonName: t.name, slug: s.slug, reviewUrl: s.reviewUrl, providerKind: s.messageProvider, wa: s };
+  const ctx: Ctx = { actor, salonName: t.name, slug: s.slug, reviewUrl: s.reviewUrl, providerKind: s.messageProvider, wa: s, sent: 0 };
   const rules = await withTenantRead(actor, (tx) => tx.select().from(automations).where(eq(automations.enabled, true)));
   const now = new Date();
   const today = todayISO();
@@ -137,6 +171,12 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
     out[rule.kind] = n;
     await withTenantTx(actor, (tx) => tx.update(automations).set({ lastRunAt: now }).where(eq(automations.id, rule.id)));
   }
+  // o que sobrou na fila (lotes anteriores) sai agora, se houver WhatsApp conectado
+  try {
+    await flushAutomationQueue(actor, ctx.sent);
+  } catch (e) {
+    console.error("flush", e);
+  }
   // vouchers vencidos
   await withTenantTx(actor, (tx) => tx.update(vouchers).set({ status: "EXPIRED" }).where(and(eq(vouchers.status, "ACTIVE"), lt(vouchers.validUntil, today))));
   return out;
@@ -144,6 +184,7 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
 
 /** Job global (cron): todos os salões ativos. */
 export async function runAutomationsForAll(): Promise<Record<string, Record<string, number>>> {
+  setSendDeadline(45_000);
   const all = await db.select({ id: tenants.id }).from(tenants).where(eq(tenants.isActive, true));
   const out: Record<string, Record<string, number>> = {};
   for (const t of all) {

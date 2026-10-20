@@ -59,17 +59,14 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
           <p className="mt-2 text-xs text-muted">Pedidos online entram como &quot;Pedido online&quot; na agenda para você confirmar.</p>
         </Card>
         <Card title="Envio de mensagens" className="mb-4">
-          <Field label="Modo" name="messageProvider">
-            <select id="messageProvider" name="messageProvider" className="field" defaultValue={s.messageProvider}>
-              <option value="MANUAL">Manual pelo seu WhatsApp (grátis: um toque por mensagem)</option>
-              <option value="WA_CLOUD" disabled={!s.waConnectedAt}>Automático pelo WhatsApp oficial do salão{s.waConnectedAt ? "" : " (conecte o número primeiro)"}</option>
-            </select>
-          </Field>
-          {s.waConnectedAt ? (
-            <p className="mt-2 text-xs text-muted">Conectado: {s.waDisplayPhone ?? "número do salão"}. As mensagens saem pelo seu número e aparecem no seu WhatsApp Business.</p>
-          ) : (
-            <p className="mt-2 text-xs text-muted">Em breve: conectar o número do seu salão ao WhatsApp oficial (você continua usando o WhatsApp Business no celular). Até lá, o modo manual envia com um toque e não tem custo.</p>
-          )}
+          <input type="hidden" name="messageProvider" value={s.messageProvider} />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="font-semibold">{s.messageProvider === "WA_QR" ? "Automático pelo WhatsApp do salão (QR code)" : s.messageProvider === "WA_CLOUD" ? "Automático pelo WhatsApp oficial (Meta)" : "Manual pelo seu WhatsApp"}</div>
+              <p className="text-sm text-muted">{s.messageProvider === "MANUAL" ? "Um toque por mensagem, sem custo. Conecte o WhatsApp do salão para os envios saírem sozinhos." : s.waQrPhone ? `Número conectado: ${formatPhone(s.waQrPhone)}` : "Conectado."}</p>
+            </div>
+            <Link href="/configuracoes/whatsapp" className="btn btn-wa btn-sm">{s.waQrConnectedAt ? "Gerenciar WhatsApp" : "Conectar WhatsApp"}</Link>
+          </div>
         </Card>
       </Form>
     </div>

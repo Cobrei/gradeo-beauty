@@ -11,7 +11,7 @@ import { addDays } from "@/lib/time";
 import { getSettings } from "@/modules/core/application/settings";
 import { segmentWhere } from "@/modules/crm/domain/segments";
 import { formatBRDate, renderTemplate, voucherCode, voucherLabel } from "../domain/templates";
-import { providerFor, waLink } from "../infrastructure/provider";
+import { humanPause, providerFor, QR_BATCH, waLink } from "../infrastructure/provider";
 
 const c = (v: unknown) => toCents(String(v ?? "0"));
 
@@ -145,6 +145,7 @@ export async function dispatchCampaign(actor: Actor, id: string, batch = 40): Pr
   assertCan(actor, "mkt.campaign.manage");
   const settings = await getSettings(actor);
   const provider = providerFor(settings.messageProvider, settings);
+  if (provider.kind === "WA_QR") batch = Math.min(batch, QR_BATCH);
   const queued = await withTenantRead(actor, (tx) => tx.select().from(messages).where(and(eq(messages.campaignId, id), eq(messages.status, "QUEUED"))).orderBy(asc(messages.createdAt)).limit(batch));
   let sent = 0;
   let failed = 0;
@@ -156,7 +157,8 @@ export async function dispatchCampaign(actor: Actor, id: string, batch = 40): Pr
     const remaining = queued.length;
     return { sent: 0, failed: 0, remaining, manual: true };
   }
-  for (const m of queued) {
+  for (const [i, m] of queued.entries()) {
+    if (provider.kind === "WA_QR" && i > 0) await humanPause();
     const r = await provider.send(m.to, m.body);
     await withTenantTx(actor, async (tx, ctx) => {
       await tx.update(messages).set(r.ok ? { status: "SENT", sentAt: new Date(), providerId: r.providerId ?? null, ...ctx.stampUpdate() } : { status: "FAILED", error: r.error?.slice(0, 255) ?? "erro", ...ctx.stampUpdate() }).where(eq(messages.id, m.id));

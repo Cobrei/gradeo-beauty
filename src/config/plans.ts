@@ -22,14 +22,14 @@ export const PLANS: Plan[] = [
     price: 49.9,
     who: "Para salões e barbearias com equipe",
     highlight: true,
-    items: ["Até 5 profissionais", "Tudo do Basic", "Comissões automáticas", "Campanhas com voucher medidas até o caixa", "Todos os segmentos de clientes e perfis de acesso"],
+    items: ["Até 5 profissionais", "Tudo do Basic", "Comissões automáticas", "WhatsApp automático pelo número do salão", "Campanhas com voucher medidas até o caixa", "Todos os segmentos de clientes e perfis de acesso"],
   },
   {
     id: "mega",
     name: "Mega",
     price: 79.9,
     who: "Para operações maiores",
-    items: ["Até 12 profissionais", "Tudo do Pro", "Coortes de retenção", "Migração assistida da sua base", "Suporte prioritário"],
+    items: ["Até 12 profissionais", "Tudo do Pro", "Coortes de retenção", "Opção de WhatsApp oficial (Meta)", "Migração assistida da sua base", "Suporte prioritário"],
   },
 ];
 
@@ -60,7 +60,8 @@ export const FEATURES: FeatureRow[] = [
   { label: "Campanhas prontas", basic: "2 modelos", pro: "8 modelos", mega: "8 modelos" },
   { label: "Voucher pessoal de uso único", basic: false, pro: true, mega: true },
   { label: "Medição de quem voltou e da receita da campanha", basic: false, pro: true, mega: true },
-  { label: "Lembrete automático pelo WhatsApp oficial do salão", basic: false, pro: "em breve", mega: "em breve" },
+  { label: "Envio automático pelo WhatsApp do salão (QR code)", basic: false, pro: true, mega: true },
+  { label: "WhatsApp oficial (API da Meta), sem risco para o número", basic: false, pro: false, mega: "Recomendado" },
 
   { group: "Gestão", label: "Relatório de faturamento, ticket e meios de pagamento", basic: true, pro: true, mega: true },
   { label: "Relatórios por profissional e serviço, novas × recorrentes, faltas", basic: false, pro: true, mega: true },
