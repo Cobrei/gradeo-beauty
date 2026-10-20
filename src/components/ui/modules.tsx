@@ -22,6 +22,7 @@ export const MODULES: Mod[] = [
   { href: "/produtos", label: "Estoque", hint: "Produtos, venda e consumo", color: "#a06a3f", icon: "M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10", action: "catalog.product.read" },
   { href: "/pacotes", label: "Pacotes", hint: "Combos e créditos de sessão", color: "#d46a5a", icon: "M4 8h16v12H4zM2 8h20V5H2zM12 5v15M12 5c-2-3-6-3-6 0M12 5c2-3 6-3 6 0", action: "catalog.service.manage" },
   { href: "/equipe", label: "Equipe", hint: "Profissionais e acessos", color: "#2a6f7f", icon: "M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 108 0 4 4 0 00-8 0M22 21v-2a4 4 0 00-3-3.87", action: "team.professional.manage" },
+  { href: "/ajuda", label: "Ajuda", hint: "Dúvidas, manual e suporte", color: "#6b5b95", icon: "M12 22a10 10 0 100-20 10 10 0 000 20zM9.1 9a3 3 0 015.8 1c0 2-3 2.5-3 4.5M12 17.5h.01" },
   { href: "/configuracoes", label: "Ajustes", hint: "Salão, horários e automações", color: "#4b3d52", icon: "M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z", action: "core.settings.manage" },
 ];
 

@@ -29,16 +29,15 @@ cols > 0 || fail("agenda sem profissionais");
 // novo agendamento para cliente nova
 const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 await page.goto(`${BASE}/agenda/novo?d=${today}`);
-// passo a passo: serviço → profissional → (horário) → confirmar
-await page.locator("a[href*='&s='], a[href*='?s='], a[href*='s=']").filter({ hasText: "min" }).first().click();
-await page.waitForURL(/s=/);
-const proLink = page.locator("a.chip[href*='pro=']").first();
-if (await proLink.count()) { await proLink.click(); await page.waitForURL(/pro=/); }
-await page.fill("#walkInName", NOME);
-await page.fill("#newClientPhone", FONE);
-await page.fill("#time", "18:30");
+// passo a passo: serviço(s) → profissional → horário → confirmar
+await page.locator("button[aria-pressed]").first().click();
+const proBtn = page.locator("button.chip").filter({ hasNotText: /^\d{2}:\d{2}$/ }).first();
+await proBtn.click();
+await page.locator("input[type=time]").first().fill("18:30");
+await page.fill("input[name=walkInName]", NOME);
+await page.fill("input[name=newClientPhone]", FONE);
 await page.check("input[name=force]");
-await page.click("button[type=submit]:has-text('Confirmar agendamento')");
+await page.click("button[type=submit]:has-text('Confirmar')");
 await page.waitForURL(/\/agenda\?d=/);
 const href = await page.locator("a", { hasText: NOME }).last().getAttribute("href");
 await page.goto(`${BASE}${href}`);

@@ -52,6 +52,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
           ))}
         </nav>
+        <Link href="/ajuda" className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold hover:bg-white/10">
+          <Icon d="M12 22a10 10 0 100-20 10 10 0 000 20zM9.1 9a3 3 0 015.8 1c0 2-3 2.5-3 4.5M12 17.5h.01" />
+          Ajuda
+        </Link>
         <Link href="/perfil" className="mb-1 block truncate rounded-xl px-3 py-2 text-sm text-white/80 hover:bg-white/10" title="Como você quer ser chamado(a)">Olá, <b className="text-white">{actor.nickname}</b></Link>
         <form action={logoutAction}>
           <button className="w-full rounded-xl px-3 py-2 text-left text-sm text-white/70 hover:bg-white/10">Sair</button>
@@ -71,6 +75,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   {n.label}
                 </Link>
               ))}
+              <Link href="/ajuda" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-mist">Ajuda</Link>
               <Link href="/perfil" className="block rounded-lg px-3 py-2 text-sm text-ink-2 hover:bg-mist">Olá, <b>{actor.nickname}</b> · perfil</Link>
               <form action={logoutAction}>
                 <button className="w-full rounded-lg px-3 py-2 text-left text-sm text-muted hover:bg-mist">Sair</button>

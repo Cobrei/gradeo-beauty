@@ -305,3 +305,70 @@ export async function nextAppointments(actor: Actor, clientId: string) {
       .limit(5),
   );
 }
+
+const multiSchema = z.object({
+  clientId: z.string().uuid().optional().or(z.literal("")),
+  walkInName: z.string().trim().max(120).optional(),
+  newClientPhone: z.string().trim().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  notes: z.string().trim().max(500).optional(),
+  source: z.enum(["APP", "ONLINE", "WALKIN", "CAMPAIGN"]).default("APP"),
+  force: z.boolean().default(false),
+  items: z
+    .array(
+      z.object({
+        serviceId: z.string().uuid(),
+        professionalId: z.string().uuid({ message: "Escolha quem vai atender cada serviço." }),
+        time: z.string().regex(/^\d{2}:\d{2}$/, "Escolha o horário de cada serviço."),
+        durationMin: z.coerce.number().int().min(5).max(600).optional(),
+        price: z.union([z.string(), z.number()]).optional(),
+      }),
+    )
+    .min(1, "Escolha pelo menos um serviço.")
+    .max(10),
+});
+
+/** Vários serviços na mesma visita (ex.: corte + coloração + unhas), cada um com profissional e horário. Tudo ou nada. */
+export async function createAppointments(actor: Actor, raw: unknown): Promise<{ ids: string[]; conflict?: string }> {
+  assertCan(actor, "agenda.appointment.write");
+  const i = multiSchema.parse(raw);
+  return withTenantTx(actor, async (tx, ctx) => {
+    let clientId = i.clientId || null;
+    let walkInName = i.walkInName?.trim() || null;
+    if (!clientId && walkInName && i.newClientPhone) {
+      const phone = normalizePhone(i.newClientPhone);
+      if (phone) {
+        const [dup] = await tx.select({ id: clients.id }).from(clients).where(and(eq(clients.phone, phone), isNull(clients.deletedAt))).limit(1);
+        if (dup) clientId = dup.id;
+        else {
+          const [c] = await tx.insert(clients).values({ ...ctx.stampCreate(), fullName: walkInName, phone, source: "WALKIN", marketingOptIn: new Date() }).returning({ id: clients.id });
+          clientId = c.id;
+        }
+        walkInName = null;
+      }
+    }
+    if (!clientId && !walkInName) throw new DomainError("VALIDATION", "Escolha a cliente ou informe um nome.", { clientId: "Obrigatório" });
+
+    const ids: string[] = [];
+    let anyConflict = false;
+    for (const it of i.items) {
+      const [sv] = await tx.select().from(services).where(eq(services.id, it.serviceId)).limit(1);
+      if (!sv) throw new NotFoundError("service");
+      const [pro] = await tx.select().from(professionals).where(eq(professionals.id, it.professionalId)).limit(1);
+      if (!pro) throw new NotFoundError("professional");
+      const startsAt = localToDate(i.date, it.time);
+      const endsAt = addMinutes(startsAt, it.durationMin ?? sv.durationMin);
+      const real = await conflictsFor(tx, it.professionalId, startsAt, endsAt);
+      if (real.length && !i.force) throw new DomainError("CONFLICT", `${sv.name}: ${pro.name} já tem atendimento ou bloqueio às ${it.time}. Escolha outro horário ou marque "encaixar mesmo assim".`);
+      if (real.length) anyConflict = true;
+      const price = it.price !== undefined && it.price !== "" ? fromCents(toCents(String(it.price))) : sv.price;
+      const [row] = await tx
+        .insert(appointments)
+        .values({ ...ctx.stampCreate(), clientId, walkInName, professionalId: it.professionalId, serviceId: it.serviceId, startsAt, endsAt, status: "SCHEDULED", source: i.source, price, notes: i.notes || null })
+        .returning({ id: appointments.id });
+      await ctx.emit("appointment.created", "appointment", row.id, { startsAt: startsAt.toISOString(), clientId });
+      ids.push(row.id);
+    }
+    return { ids, conflict: anyConflict ? "encaixe" : undefined };
+  });
+}

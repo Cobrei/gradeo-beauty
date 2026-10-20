@@ -172,7 +172,7 @@ export default async function Home() {
             <p className="text-xs font-bold uppercase tracking-wider text-brand">Recursos</p>
             <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Tudo para administrar o salão, numa tela só</h2>
             <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {MODULES.filter((m) => m.href !== "/configuracoes").map((m) => (
+              {MODULES.filter((m) => m.href !== "/configuracoes" && m.href !== "/ajuda").map((m) => (
                 <div key={m.href} className="rounded-[var(--radius-card)] bg-white p-4 shadow-[0_1px_2px_rgba(35,26,41,.05),0_4px_16px_rgba(35,26,41,.05)]">
                   <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-[inset_0_-3px_0_rgba(0,0,0,.12)]" style={{ background: m.color }}>
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

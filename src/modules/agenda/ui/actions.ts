@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireActor } from "@/modules/core/application/auth";
 import { toActionError, type ActionResult } from "@/lib/errors";
-import { addBlock, addToWaitlist, createAppointment, removeBlock, rescheduleAppointment, setWaitlistStatus, transitionAppointment } from "../application/use-cases";
+import { addBlock, addToWaitlist, createAppointment, createAppointments, removeBlock, rescheduleAppointment, setWaitlistStatus, transitionAppointment } from "../application/use-cases";
 
 export async function createAppointmentAction(_p: ActionResult<unknown> | null, fd: FormData): Promise<ActionResult<unknown>> {
   const date = String(fd.get("date"));
@@ -108,4 +108,36 @@ export async function waitlistStatusAction(fd: FormData) {
   await setWaitlistStatus(actor, String(fd.get("id")), String(fd.get("status")) as "NOTIFIED" | "BOOKED" | "EXPIRED");
   revalidatePath("/agenda/espera");
   redirect("/agenda/espera");
+}
+
+/** Agendamento com vários serviços (JSON dos itens no campo "items"). */
+export async function createAppointmentsAction(_p: ActionResult<unknown> | null, fd: FormData): Promise<ActionResult<unknown>> {
+  const date = String(fd.get("date"));
+  let back = `/agenda?d=${date}`;
+  try {
+    const actor = await requireActor();
+    let items: unknown = [];
+    try {
+      items = JSON.parse(String(fd.get("items") || "[]"));
+    } catch {
+      items = [];
+    }
+    const r = await createAppointments(actor, {
+      clientId: fd.get("clientId") || "",
+      walkInName: fd.get("walkInName") || undefined,
+      newClientPhone: fd.get("newClientPhone") || undefined,
+      date,
+      notes: fd.get("notes") || undefined,
+      source: fd.get("source") || "APP",
+      force: fd.get("force") === "on",
+      items,
+    });
+    if (r.conflict) back += "&aviso=encaixe";
+    const ret = fd.get("return");
+    if (ret) back = String(ret);
+  } catch (e) {
+    return toActionError(e);
+  }
+  revalidatePath("/agenda");
+  redirect(back);
 }
