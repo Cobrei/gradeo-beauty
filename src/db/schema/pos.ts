@@ -38,6 +38,8 @@ export const orders = pgTable(
   {
     ...baseCols,
     number: integer("number").notNull(),
+    /** link público do recibo (/recibo/<token>) */
+    publicToken: uuid("public_token").notNull().defaultRandom(),
     clientId: uuid("client_id"),
     walkInName: varchar("walk_in_name", { length: 120 }),
     status: varchar("status", { length: 10 }).notNull().default("OPEN"), // OPEN, PAID, CANCELLED

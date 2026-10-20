@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Logo } from "@/components/ui/logo";
+import { PoweredBy, SalonMark } from "@/components/ui/salon-brand";
 import { publicCatalog, publicSlots } from "@/modules/agenda/application/public-booking";
 import { publicBookAction } from "@/modules/agenda/ui/public-actions";
 import { fromCents, toCents, formatBRL } from "@/lib/money";
@@ -38,10 +38,11 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
   const step = sp.ok ? 5 : !service ? 1 : !pro ? 2 : !time ? 3 : 4;
 
   return (
-    <main className="min-h-dvh bg-mist">
+    <main className="min-h-dvh bg-mist" style={salon.brandColor ? ({ "--color-brand": salon.brandColor } as React.CSSProperties) : undefined}>
       <div className="mx-auto max-w-lg px-4 py-6">
-        <header className="mb-5 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">{salon.salonName}</h1>
+        <header className="mb-5 flex flex-col items-center text-center">
+          <SalonMark name={salon.salonName} logo={salon.logoData} color={salon.brandColor} size={salon.logoData ? 72 : 56} showName={false} />
+          <h1 className="mt-2 text-2xl font-bold tracking-tight">{salon.salonName}</h1>
           <p className="text-sm text-muted">{(salon.addressJson as { text?: string } | null)?.text ?? ""}{salon.instagram ? ` · @${salon.instagram}` : ""}</p>
         </header>
 
@@ -132,7 +133,7 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
           </>
         )}
         <footer className="mt-8 text-center text-xs text-muted">
-          agendamento por <Logo size={14} product="beauty" />
+          <PoweredBy label="agendamento por" />
         </footer>
       </div>
     </main>

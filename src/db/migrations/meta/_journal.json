@@ -43,6 +43,13 @@
       "when": 1792451677480,
       "tag": "0005_whatsapp_por_salao",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792451678480,
+      "tag": "0006_marca_e_links",
+      "breakpoints": true
     }
   ]
 }

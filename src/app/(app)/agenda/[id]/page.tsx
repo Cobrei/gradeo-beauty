@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { appUrl } from "@/lib/app-url";
 import { Badge, Card, Field, PageHeader, WaLink } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
@@ -25,7 +26,7 @@ export default async function AppointmentPage({ params }: { params: Promise<{ id
   const back = `/agenda?d=${l.date}`;
   const name = a.clientName ?? ap.walkInName ?? "Cliente";
   const first = name.split(" ")[0];
-  const confirmMsg = `Oi ${first}! Confirmando seu horário no ${settings.salonName}: ${l.date.split("-").reverse().join("/")} às ${l.time}, ${a.serviceName} com ${a.professionalName}. Posso confirmar? 💕`;
+  const confirmMsg = `Oi ${first}! Confirmando seu horário no ${settings.salonName}: ${l.date.split("-").reverse().join("/")} às ${l.time}, ${a.serviceName} com ${a.professionalName}. Confirme por aqui: ${appUrl(`/h/${a.appt.publicToken}`)} 💕`;
 
   const buttons: Record<string, { label: string; cls: string }> = {
     SCHEDULED: { label: "Confirmar pedido", cls: "btn-primary" },

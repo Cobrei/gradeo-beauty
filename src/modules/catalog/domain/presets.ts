@@ -99,7 +99,7 @@ export const DEFAULT_HOURS = {
 };
 
 export const DEFAULT_AUTOMATIONS: { kind: string; label: string; template: string; settings: Record<string, unknown>; enabled: boolean }[] = [
-  { kind: "REMINDER_24H", label: "Lembrete 24h antes", enabled: true, template: "Oi {nome}! Passando para lembrar do seu horário amanhã às {hora} ({servico}) com {profissional}, no {salao}. Se precisar remarcar, é só responder aqui 💕", settings: { hoursBefore: 24 } },
+  { kind: "REMINDER_24H", label: "Lembrete do horário (com link de confirmação)", enabled: true, template: "Oi {nome}! Passando para lembrar do seu horário {data} às {hora} ({servico}) com {profissional}, no {salao}. Confirme por aqui: {confirmar} 💕", settings: { hoursBefore: 24 } },
   { kind: "THANKS", label: "Agradecimento + avaliação (2h depois)", enabled: true, template: "{nome}, obrigada pela visita hoje! Ficou como você queria? Se puder, deixa uma avaliação pra gente: {link} ✨", settings: { hoursAfter: 2 } },
   { kind: "RETURN_INVITE", label: "Convite de retorno (no ciclo do serviço)", enabled: true, template: "Oi {nome}! Já está na época de renovar o seu {servico} 😉 Quer que eu reserve um horário essa semana no {salao}?", settings: { daysAfterCycle: 0 } },
   { kind: "BIRTHDAY", label: "Aniversário", enabled: true, template: "Parabéns, {nome}! 🎉 O {salao} preparou um presente: {voucher} válido até {validade}. Vem comemorar com a gente!", settings: { voucherKind: "PERCENT", voucherValue: 15, voucherDays: 30 } },

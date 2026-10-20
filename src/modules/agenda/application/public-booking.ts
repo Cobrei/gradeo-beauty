@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { withTenant } from "@/lib/context";
-import { professionals, services } from "@/db/schema";
+import { appointments, professionals, services } from "@/db/schema";
 import { DomainError } from "@/lib/errors";
 import { systemActor } from "@/lib/system-actor";
 import { getPublicSalon } from "@/modules/core/application/settings";
@@ -38,5 +38,6 @@ export async function publicBook(slug: string, input: { professionalId: string; 
   if (!slots.includes(input.time)) throw new DomainError("SLOT_TAKEN", "Esse horário acabou de ser ocupado. Escolha outro.");
   const actor = systemActor(salon.tenantId, "agendamento online");
   const r = await createAppointment(actor, { ...input, walkInName: input.name, newClientPhone: input.phone, source: "ONLINE" });
-  return { id: r.id, salon };
+  const [row] = await withTenant(salon.tenantId, (tx) => tx.select({ token: appointments.publicToken }).from(appointments).where(eq(appointments.id, r.id)).limit(1));
+  return { id: r.id, token: row?.token ?? null, salon };
 }

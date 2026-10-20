@@ -127,7 +127,7 @@ await pub.fill("#name", "Cliente Online");
 await pub.fill("#phone", "51 97777-6666");
 await pub.screenshot({ path: "e2e/shots/13-publico.png", fullPage: true });
 await pub.click("button:has-text('Pedir horário')");
-await pub.waitForURL(/ok=1/);
+await pub.waitForURL(/\/h\/[0-9a-f-]+\?r=pedido/);
 await pub.screenshot({ path: "e2e/shots/14-publico-ok.png", fullPage: true });
 
 // pedido online aparece na agenda como REQUESTED

@@ -21,10 +21,34 @@ export const getSettings = cache(async (actor: Actor): Promise<SalonSettings> =>
 });
 
 /** Para a página pública de agendamento (sem ator): busca por slug, fora do RLS (usa a sessão de app). */
+/** Colunas que podem aparecer em páginas públicas (nunca tokens ou dados internos). */
+const publicCols = {
+  tenantId: salonSettings.tenantId,
+  slug: salonSettings.slug,
+  whatsapp: salonSettings.whatsapp,
+  phone: salonSettings.phone,
+  instagram: salonSettings.instagram,
+  addressJson: salonSettings.addressJson,
+  openingHours: salonSettings.openingHours,
+  onlineBooking: salonSettings.onlineBooking,
+  onlineBookingLeadMin: salonSettings.onlineBookingLeadMin,
+  reviewUrl: salonSettings.reviewUrl,
+  logoData: salonSettings.logoData,
+  brandColor: salonSettings.brandColor,
+};
+
 export async function getPublicSalon(slug: string) {
-  const [row] = await db.select().from(salonSettings).where(eq(salonSettings.slug, slug)).limit(1);
+  const [row] = await db.select(publicCols).from(salonSettings).where(eq(salonSettings.slug, slug)).limit(1);
   if (!row) return null;
   const [t] = await db.select({ name: tenants.name }).from(tenants).where(eq(tenants.id, row.tenantId)).limit(1);
+  return { ...row, salonName: t?.name ?? "" };
+}
+
+/** Marca do salão por id (páginas públicas de recibo/horário). */
+export async function getPublicSalonById(tenantId: string) {
+  const [row] = await db.select(publicCols).from(salonSettings).where(eq(salonSettings.tenantId, tenantId)).limit(1);
+  if (!row) return null;
+  const [t] = await db.select({ name: tenants.name }).from(tenants).where(eq(tenants.id, tenantId)).limit(1);
   return { ...row, salonName: t?.name ?? "" };
 }
 
@@ -41,7 +65,13 @@ export const settingsSchema = z.object({
   onlineBooking: z.boolean(),
   onlineBookingLeadMin: z.coerce.number().int().min(0).max(1440),
   reviewUrl: z.string().trim().url().optional().or(z.literal("")),
-  messageProvider: z.enum(["MANUAL", "WA_CLOUD"]),
+  messageProvider: z.enum(["MANUAL", "WA_CLOUD", "WA_QR"]),
+  logoData: z
+    .string()
+    .max(300_000, "Logo grande demais.")
+    .refine((v) => v === "" || /^data:image\/(png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v), "Formato de logo inválido.")
+    .optional(),
+  brandColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
   openingHours: hoursSchema,
 });
 
@@ -52,6 +82,10 @@ export async function updateSettings(actor: Actor, raw: unknown) {
   const [other] = await db.select({ tenantId: salonSettings.tenantId }).from(salonSettings).where(eq(salonSettings.slug, input.slug)).limit(1);
   if (other && other.tenantId !== actor.tenantId) throw new DomainError("SLUG_TAKEN", "Este endereço já está em uso.");
   return withTenantTx(actor, async (tx, ctx) => {
+    if (input.messageProvider === "WA_QR") {
+      const [cur] = await tx.select({ c: salonSettings.waQrConnectedAt }).from(salonSettings).where(eq(salonSettings.tenantId, actor.tenantId)).limit(1);
+      if (!cur?.c) throw new DomainError("WA_NOT_CONNECTED", "Conecte o WhatsApp do salão pelo QR code antes de ligar o envio automático.");
+    }
     if (input.messageProvider === "WA_CLOUD") {
       const [cur] = await tx.select({ c: salonSettings.waConnectedAt }).from(salonSettings).where(eq(salonSettings.tenantId, actor.tenantId)).limit(1);
       if (!cur?.c) throw new DomainError("WA_NOT_CONNECTED", "Conecte o WhatsApp do salão antes de ligar o envio automático.");
@@ -71,6 +105,8 @@ export async function updateSettings(actor: Actor, raw: unknown) {
           onlineBookingLeadMin: input.onlineBookingLeadMin,
           reviewUrl: input.reviewUrl || null,
           messageProvider: input.messageProvider,
+          ...(input.logoData !== undefined ? { logoData: input.logoData || null } : {}),
+          ...(input.brandColor !== undefined ? { brandColor: input.brandColor || null } : {}),
           messageSenderName: input.salonName,
           openingHours: input.openingHours as OpeningHours,
           ...ctx.stampUpdate(),

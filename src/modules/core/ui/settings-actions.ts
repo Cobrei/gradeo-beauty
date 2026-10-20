@@ -22,6 +22,8 @@ export async function saveSettingsAction(_p: ActionResult<unknown> | null, fd: F
       onlineBookingLeadMin: fd.get("onlineBookingLeadMin") || 60,
       reviewUrl: fd.get("reviewUrl") || "",
       messageProvider: fd.get("messageProvider") || "MANUAL",
+      logoData: fd.has("logoData") ? String(fd.get("logoData") ?? "") : undefined,
+      brandColor: fd.get("brandColor") ? String(fd.get("brandColor")) : undefined,
       openingHours,
     });
   } catch (e) {

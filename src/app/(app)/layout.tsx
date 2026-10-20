@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Logo } from "@/components/ui/logo";
+import { PoweredBy, SalonMark } from "@/components/ui/salon-brand";
+import { getSettings } from "@/modules/core/application/settings";
 import { getActor } from "@/modules/core/application/auth";
 import { logoutAction } from "@/modules/core/ui/actions";
 import { can } from "@/lib/context";
@@ -24,14 +25,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const actor = await getActor();
   if (!actor) redirect("/login");
   const nav = NAV.filter((n) => (!n.action || can(actor, n.action)) && (!n.anyOf || n.anyOf.some((a) => can(actor, a))));
+  const salon = await getSettings(actor);
   const mobile = [...nav.filter((n) => n.mobile), { href: "/mais", label: "Mais", icon: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" }];
   return (
     <div className="flex min-h-dvh">
       <aside className="hidden w-60 shrink-0 flex-col bg-ink px-3 py-5 text-white md:flex">
-        <div className="mb-6 px-2">
-          <Logo size={26} tone="dark" />
-          <div className="mt-1 truncate text-xs text-white/60">{actor.name}</div>
-        </div>
+        <Link href="/painel" className="mb-5 block rounded-2xl bg-white px-3 py-3 text-ink">
+          {salon.logoData ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={salon.logoData} alt={salon.salonName} className="mx-auto max-h-14 max-w-full object-contain" />
+              <div className="mt-2 truncate text-center text-xs text-muted">{actor.name}</div>
+            </>
+          ) : (
+            <>
+              <SalonMark name={salon.salonName} logo={null} color={salon.brandColor} size={34} />
+              <div className="mt-1.5 truncate text-xs text-muted">{actor.name}</div>
+            </>
+          )}
+        </Link>
         <nav className="flex flex-1 flex-col gap-0.5">
           {nav.map((n) => (
             <Link key={n.href} href={n.href} className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold hover:bg-white/10">
@@ -43,11 +55,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <form action={logoutAction}>
           <button className="w-full rounded-xl px-3 py-2 text-left text-sm text-white/70 hover:bg-white/10">Sair</button>
         </form>
+        <div className="mt-3 px-3"><PoweredBy tone="dark" label="sistema" /></div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between px-4 py-3 md:hidden">
-          <Link href="/painel">
-            <Logo size={22} />
+          <Link href="/painel" className="min-w-0">
+            <SalonMark name={salon.salonName} logo={salon.logoData} color={salon.brandColor} size={30} showName={!salon.logoData} />
           </Link>
           <details className="relative">
             <summary className="list-none rounded-lg px-2 py-1 text-sm font-semibold text-ink-2">Menu</summary>

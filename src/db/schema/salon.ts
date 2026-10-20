@@ -28,6 +28,15 @@ export const salonSettings = pgTable(
     waAccessToken: text("wa_access_token"),
     waDisplayPhone: varchar("wa_display_phone", { length: 20 }),
     waConnectedAt: timestamp("wa_connected_at", { withTimezone: true }),
+    // WhatsApp por QR code (servidor da gradeo; uma instância por salão)
+    waQrInstance: varchar("wa_qr_instance", { length: 80 }),
+    waQrConnectedAt: timestamp("wa_qr_connected_at", { withTimezone: true }),
+    waQrPhone: varchar("wa_qr_phone", { length: 20 }),
+    waQrTermsAcceptedAt: timestamp("wa_qr_terms_accepted_at", { withTimezone: true }),
+    waQrTermsAcceptedBy: uuid("wa_qr_terms_accepted_by"),
+    // marca do salão: logo (imagem reduzida, data URL) e cor de destaque
+    logoData: text("logo_data"),
+    brandColor: varchar("brand_color", { length: 7 }),
     onboardingDone: boolean("onboarding_done").notNull().default(false),
   },
   (t) => [uniqueIndex("uq_settings_tenant").on(t.tenantId), uniqueIndex("uq_settings_slug").on(t.slug)],

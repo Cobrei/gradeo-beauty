@@ -1,4 +1,5 @@
 import { MoneyInput } from "@/components/ui/money-input";
+import { appUrl } from "@/lib/app-url";
 import Link from "next/link";
 import { Badge, Card, Field, Notice, PageHeader, WaLink } from "@/components/ui";
 import { Form } from "@/components/ui/form";
@@ -25,7 +26,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
   const total = toCents(ord.total);
   const name = o.clientName ?? ord.walkInName ?? "Cliente";
   const creditServices = new Set(o.credits.map((c) => c.serviceId));
-  const receipt = `*${settings.salonName}* · Comanda #${ord.number} · ${formatBR(ord.serviceDate)}\n${o.items.map((i) => `• ${i.item.description} ${Number(i.item.qty) > 1 ? `×${Number(i.item.qty)} ` : ""}${formatBRL(toCents(i.item.total))}`).join("\n")}\n${toCents(ord.discount) + toCents(ord.voucherDiscount) > 0 ? `Descontos: ${formatBRL(toCents(ord.discount) + toCents(ord.voucherDiscount))}\n` : ""}*Total: ${formatBRL(total)}*\nObrigada pela visita! 💕`;
+  const receipt = `*${settings.salonName}* · Comanda #${ord.number} · ${formatBR(ord.serviceDate)}\n${o.items.map((i) => `• ${i.item.description} ${Number(i.item.qty) > 1 ? `×${Number(i.item.qty)} ` : ""}${formatBRL(toCents(i.item.total))}`).join("\n")}\n${toCents(ord.discount) + toCents(ord.voucherDiscount) > 0 ? `Descontos: ${formatBRL(toCents(ord.discount) + toCents(ord.voucherDiscount))}\n` : ""}*Total: ${formatBRL(total)}*\nRecibo: ${appUrl(`/recibo/${ord.publicToken}`)}\nObrigada pela visita! 💕`;
 
   return (
     <div>

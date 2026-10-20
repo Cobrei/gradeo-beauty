@@ -1,6 +1,6 @@
 import { firstName } from "@/lib/phone";
 
-export interface TemplateVars { nome?: string; salao?: string; voucher?: string; validade?: string; link?: string; hora?: string; data?: string; servico?: string; profissional?: string }
+export interface TemplateVars { nome?: string; salao?: string; voucher?: string; validade?: string; link?: string; hora?: string; data?: string; servico?: string; profissional?: string; confirmar?: string }
 
 /** Substitui {variavel} no texto; variáveis desconhecidas ficam vazias. */
 export function renderTemplate(template: string, vars: TemplateVars): string {
@@ -14,6 +14,7 @@ export function renderTemplate(template: string, vars: TemplateVars): string {
     .replace(/\{data\}/gi, vars.data ?? "")
     .replace(/\{servico\}/gi, vars.servico ?? "")
     .replace(/\{profissional\}/gi, vars.profissional ?? "")
+    .replace(/\{confirmar\}/gi, vars.confirmar ?? "")
     .replace(/[ \t]{2,}/g, " ")
     .trim();
 }

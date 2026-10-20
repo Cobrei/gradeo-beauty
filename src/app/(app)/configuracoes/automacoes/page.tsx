@@ -28,7 +28,7 @@ export default async function AutomacoesPage({ searchParams }: { searchParams: P
               <Form action={saveAutomationAction} submitLabel="Salvar">
                 <input type="hidden" name="kind" value={a.kind} />
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={a.enabled} className="h-4 w-4 accent-[#b8475f]" /> Ativa</label>
-                <Field label="Mensagem" name="template" hint="Variáveis: {nome} {salao} {hora} {data} {servico} {profissional} {voucher} {validade} {link}">
+                <Field label="Mensagem" name="template" hint="Variáveis: {nome} {salao} {hora} {data} {servico} {profissional} {voucher} {validade} {link} {confirmar} (link para a cliente confirmar o horário)">
                   <textarea id={`t_${a.kind}`} name="template" rows={3} className="field" defaultValue={a.template} />
                 </Field>
                 <div className="grid grid-cols-3 gap-2">

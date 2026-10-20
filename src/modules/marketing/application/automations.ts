@@ -1,3 +1,4 @@
+import { appUrl } from "@/lib/app-url";
 import "server-only";
 import { and, eq, gte, inArray, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -33,7 +34,7 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
   const rules = await withTenantRead(actor, (tx) => tx.select().from(automations).where(eq(automations.enabled, true)));
   const now = new Date();
   const today = todayISO();
-  const link = `https://${process.env.NEXT_PUBLIC_APP_HOST ?? "beauty.gradeo.com.br"}/agendar/${s.slug}`;
+  const link = appUrl(`/agendar/${s.slug}`);
 
   for (const rule of rules) {
     let n = 0;
@@ -44,7 +45,7 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
       const to = dayRange(addDays(today, 1)).end;
       const rows = await withTenantRead(actor, (tx) =>
         tx
-          .select({ id: appointments.id, startsAt: appointments.startsAt, clientId: appointments.clientId, phone: clients.phone, name: clients.fullName, service: services.name, pro: professionals.name })
+          .select({ id: appointments.id, token: appointments.publicToken, startsAt: appointments.startsAt, clientId: appointments.clientId, phone: clients.phone, name: clients.fullName, service: services.name, pro: professionals.name })
           .from(appointments)
           .innerJoin(clients, eq(clients.id, appointments.clientId))
           .innerJoin(services, eq(services.id, appointments.serviceId))
@@ -53,7 +54,7 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
       );
       for (const r of rows) {
         const l = dateToLocal(r.startsAt);
-        await enqueue(ctx, rule.kind, r.clientId!, r.phone!, renderTemplate(rule.template, { nome: r.name, salao: ctx.salonName, hora: l.time, data: formatBRDate(l.date), servico: r.service, profissional: r.pro, link }), { appointmentId: r.id });
+        await enqueue(ctx, rule.kind, r.clientId!, r.phone!, renderTemplate(rule.template, { nome: r.name, salao: ctx.salonName, hora: l.time, data: formatBRDate(l.date), servico: r.service, profissional: r.pro, link, confirmar: appUrl(`/h/${r.token}`) }), { appointmentId: r.id });
         await withTenantTx(actor, (tx) => tx.update(appointments).set({ reminderSentAt: now }).where(eq(appointments.id, r.id)));
         n++;
       }

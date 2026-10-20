@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, Field, Notice, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
+import { LogoUpload } from "@/components/ui/logo-upload";
 import { requireActor } from "@/modules/core/application/auth";
 import { getSettings } from "@/modules/core/application/settings";
 import { saveSettingsAction } from "@/modules/core/ui/settings-actions";
@@ -21,6 +22,9 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
       <PageHeader title="Configurações" subtitle="Salão, horários, agendamento online e envio de mensagens." action={<><Link href="/configuracoes/automacoes" className="btn btn-secondary btn-sm">Automações</Link><Link href="/pacotes" className="btn btn-secondary btn-sm">Pacotes</Link></>} />
       {sp.salvo && <div className="mb-4"><Notice tone="ok">Salvo.</Notice></div>}
       <Form action={saveSettingsAction} submitLabel="Salvar configurações">
+        <Card title="Marca do salão" className="mb-4">
+          <LogoUpload initial={s.logoData} color={s.brandColor} />
+        </Card>
         <Card title="Salão" className="mb-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Nome" name="salonName"><input id="salonName" name="salonName" className="field" required defaultValue={s.salonName} /></Field>

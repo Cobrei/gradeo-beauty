@@ -10,6 +10,8 @@ export const appointments = pgTable(
   "agd_appointments",
   {
     ...baseCols,
+    /** link público do horário (/h/<token>): a cliente vê e confirma presença */
+    publicToken: uuid("public_token").notNull().defaultRandom(),
     clientId: uuid("client_id"),
     walkInName: varchar("walk_in_name", { length: 120 }),
     professionalId: uuid("professional_id").notNull(),

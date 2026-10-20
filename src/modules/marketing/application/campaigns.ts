@@ -1,3 +1,4 @@
+import { appUrl } from "@/lib/app-url";
 import "server-only";
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -117,7 +118,7 @@ export async function prepareCampaign(actor: Actor, id: string) {
       .select({ id: clients.id, fullName: clients.fullName, phone: clients.phone, email: clients.email })
       .from(clients)
       .where(and(segmentWhere(cp.segment, today), isNull(clients.marketingOptOut), cp.channel === "WHATSAPP" ? isNotNull(clients.phone) : isNotNull(clients.email)));
-    const link = `https://${process.env.NEXT_PUBLIC_APP_HOST ?? "beauty.gradeo.com.br"}/agendar/${settings.slug}`;
+    const link = appUrl(`/agendar/${settings.slug}`);
     const validUntil = cp.voucherKind ? addDays(today, cp.voucherDays ?? 15) : null;
     for (const cl of aud) {
       let voucherId: string | null = null;
