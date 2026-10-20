@@ -13,7 +13,7 @@ export const MODULES: Mod[] = [
   { href: "/clientes", label: "Clientes", hint: "Ficha, histórico e segmentos", color: "#8a5cc2", icon: "M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0z", action: "crm.client.read" },
   { href: "/comandas", label: "Comandas", hint: "Serviços, produtos e pagamento", color: "#e08a2e", icon: "M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6", action: "pos.order.read" },
   { href: "/caixa", label: "Caixa", hint: "Abertura, sangria e fechamento", color: "#2f9a78", icon: "M3 7h18v12H3zM3 11h18M7 15h3", action: "pos.cash.read" },
-  { href: "/campanhas", label: "Campanhas", hint: "Traga as clientes de volta", color: "#e2577a", icon: "M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15 9a3 3 0 010 6M18 6a7 7 0 010 12", action: "mkt.campaign.manage" },
+  { href: "/campanhas", label: "Campanhas", hint: "Convide clientes a voltar", color: "#e2577a", icon: "M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15 9a3 3 0 010 6M18 6a7 7 0 010 12", action: "mkt.campaign.manage" },
   { href: "/vouchers", label: "Vouchers", hint: "Cupons pessoais e genéricos", color: "#d4a24c", icon: "M3 8a2 2 0 002-2h14a2 2 0 002 2v2a2 2 0 000 4v2a2 2 0 00-2 2H5a2 2 0 00-2-2v-2a2 2 0 000-4zM10 6v12", action: "mkt.voucher.manage" },
   { href: "/mensagens", label: "Mensagens", hint: "Fila de envio pelo WhatsApp", color: "#25a26b", icon: "M4 5h16v11H8l-4 4zM8 9h8M8 12h5", anyOf: ["mkt.message.send", "mkt.campaign.manage"] },
   { href: "/comissoes", label: "Comissões", hint: "Por profissional e período", color: "#3f7fbf", icon: "M12 3v18M16 7H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H7", anyOf: ["commission.read_all", "commission.read_own"] },
