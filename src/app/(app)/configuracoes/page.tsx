@@ -1,0 +1,69 @@
+import Link from "next/link";
+import { Card, Field, Notice, PageHeader } from "@/components/ui";
+import { Form } from "@/components/ui/form";
+import { requireActor } from "@/modules/core/application/auth";
+import { getSettings } from "@/modules/core/application/settings";
+import { saveSettingsAction } from "@/modules/core/ui/settings-actions";
+import { assertCan } from "@/lib/context";
+import { WEEKDAYS } from "@/lib/time";
+import { formatPhone } from "@/lib/phone";
+
+export const metadata = { title: "Configurações" };
+
+export default async function ConfigPage({ searchParams }: { searchParams: Promise<{ salvo?: string }> }) {
+  const actor = await requireActor();
+  assertCan(actor, "core.settings.manage");
+  const sp = await searchParams;
+  const s = await getSettings(actor);
+  const host = process.env.NEXT_PUBLIC_APP_HOST ? `https://${process.env.NEXT_PUBLIC_APP_HOST}` : "";
+  return (
+    <div className="mx-auto max-w-3xl">
+      <PageHeader title="Configurações" subtitle="Salão, horários, agendamento online e envio de mensagens." action={<><Link href="/configuracoes/automacoes" className="btn btn-secondary btn-sm">Automações</Link><Link href="/pacotes" className="btn btn-secondary btn-sm">Pacotes</Link></>} />
+      {sp.salvo && <div className="mb-4"><Notice tone="ok">Salvo.</Notice></div>}
+      <Form action={saveSettingsAction} submitLabel="Salvar configurações">
+        <Card title="Salão" className="mb-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Nome" name="salonName"><input id="salonName" name="salonName" className="field" required defaultValue={s.salonName} /></Field>
+            <Field label="Endereço de agendamento" name="slug" hint={`${host}/agendar/${s.slug}`}><input id="slug" name="slug" className="field" required defaultValue={s.slug} /></Field>
+            <Field label="WhatsApp do salão" name="whatsapp"><input id="whatsapp" name="whatsapp" className="field" defaultValue={formatPhone(s.whatsapp)} /></Field>
+            <Field label="Telefone" name="phone"><input id="phone" name="phone" className="field" defaultValue={formatPhone(s.phone)} /></Field>
+            <Field label="Instagram" name="instagram"><input id="instagram" name="instagram" className="field" defaultValue={s.instagram ?? ""} placeholder="@seusalao" /></Field>
+            <Field label="Endereço" name="address"><input id="address" name="address" className="field" defaultValue={(s.addressJson as { text?: string } | null)?.text ?? ""} /></Field>
+            <Field label="Link para avaliação (Google)" name="reviewUrl" hint="Vai na mensagem pós-atendimento." className="sm:col-span-2"><input id="reviewUrl" name="reviewUrl" className="field" defaultValue={s.reviewUrl ?? ""} placeholder="https://g.page/r/.../review" /></Field>
+          </div>
+        </Card>
+        <Card title="Horário de funcionamento" className="mb-4">
+          <div className="space-y-1">
+            {WEEKDAYS.map((d, i) => {
+              const h = s.openingHours[String(i)];
+              return (
+                <div key={d} className="grid grid-cols-6 items-center gap-2 text-sm">
+                  <label className="col-span-2 flex items-center gap-2"><input type="checkbox" name={`wd_${i}`} defaultChecked={!!h} className="h-4 w-4 accent-[#b8475f]" /> {d}</label>
+                  <input type="time" name={`open_${i}`} defaultValue={h?.open ?? "09:00"} className="field col-span-2 min-h-9 py-1" />
+                  <input type="time" name={`close_${i}`} defaultValue={h?.close ?? "19:00"} className="field col-span-2 min-h-9 py-1" />
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+        <Card title="Agendamento online" className="mb-4">
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="onlineBooking" defaultChecked={s.onlineBooking} className="h-4 w-4 accent-[#b8475f]" /> Clientes podem agendar pelo link</label>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <Field label="Grade de horários (min)" name="slotMinutes"><input id="slotMinutes" name="slotMinutes" type="number" min={5} max={60} step={5} className="field" defaultValue={s.slotMinutes} /></Field>
+            <Field label="Antecedência mínima (min)" name="onlineBookingLeadMin"><input id="onlineBookingLeadMin" name="onlineBookingLeadMin" type="number" min={0} className="field" defaultValue={s.onlineBookingLeadMin} /></Field>
+          </div>
+          <p className="mt-2 text-xs text-muted">Pedidos online entram como &quot;Pedido online&quot; na agenda para você confirmar.</p>
+        </Card>
+        <Card title="Envio de mensagens" className="mb-4">
+          <Field label="Modo" name="messageProvider">
+            <select id="messageProvider" name="messageProvider" className="field" defaultValue={s.messageProvider}>
+              <option value="MANUAL">Manual pelo seu WhatsApp (grátis: um toque por mensagem)</option>
+              <option value="WA_CLOUD">Automático pela API oficial do WhatsApp (Meta)</option>
+            </select>
+          </Field>
+          <p className="mt-2 text-xs text-muted">O modo automático exige uma conta WhatsApp Business API e as variáveis WHATSAPP_TOKEN e WHATSAPP_PHONE_ID no servidor. Fora da janela de 24h a Meta exige templates aprovados.</p>
+        </Card>
+      </Form>
+    </div>
+  );
+}

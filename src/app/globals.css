@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* Design tokens — fonte do sistema, zero download. Paleta: ameixa + rosé + dourado. */
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-ink: #231a29;
+  --color-ink-2: #4b3d52;
+  --color-mist: #f6f1f3;
+  --color-line: #e6dde1;
+  --color-brand: #b8475f;
+  --color-brand-soft: #f8e4e9;
+  --color-gold: #d4a24c;
+  --color-gold-soft: #fbf1dc;
+  --color-ok: #2f9a78;
+  --color-ok-soft: #e0f3ec;
+  --color-warn: #e08a2e;
+  --color-warn-soft: #fdebd6;
+  --color-bad: #d64545;
+  --color-bad-soft: #fbe3e3;
+  --color-info: #5b6fb5;
+  --color-info-soft: #e6e9f6;
+  --color-muted: #8e8391;
+  --radius-card: 16px;
+}
+
+html { color: var(--color-ink); background: #fcfafb; }
+body { font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; }
+
+/* Alvos de toque grandes: recepção usa no celular com uma mão. */
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-base font-semibold transition active:scale-[0.98] disabled:opacity-50 min-h-12; }
+.btn-primary { @apply bg-brand text-white hover:brightness-95; }
+.btn-secondary { @apply bg-mist text-ink hover:bg-[#eee5e9]; }
+.btn-danger { @apply bg-bad text-white hover:brightness-95; }
+.btn-ghost { @apply text-ink-2 hover:bg-mist; }
+.btn-sm { @apply min-h-9 px-3 py-1.5 text-sm rounded-lg; }
+.btn-wa { @apply bg-[#25d366] text-white hover:brightness-95; }
+.field { @apply w-full rounded-xl border border-line bg-white px-3 py-3 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/25 min-h-12; }
+.label { @apply mb-1 block text-sm font-semibold text-ink-2; }
+.card { @apply rounded-[var(--radius-card)] bg-white p-4 shadow-[0_1px_2px_rgba(35,26,41,.05),0_4px_18px_rgba(35,26,41,.05)]; }
+.badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold; }
+.tbl { @apply w-full text-sm; }
+.tbl th { @apply px-3 py-2 text-left text-xs font-bold uppercase tracking-wide text-muted; }
+.tbl td { @apply border-t border-line px-3 py-2.5 align-middle; }
+.chip { @apply inline-flex items-center rounded-full border border-line bg-white px-3 py-1.5 text-sm font-semibold text-ink-2 hover:border-brand hover:text-brand; }
+.chip-on { @apply border-brand bg-brand-soft text-brand; }

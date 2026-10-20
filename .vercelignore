@@ -1,0 +1,9 @@
+node_modules
+.next
+e2e
+docs
+*.png
+*.jpg
+.env.local
+.env
+.git
