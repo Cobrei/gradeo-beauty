@@ -9,7 +9,7 @@ import { SEGMENTS } from "@/modules/catalog/domain/presets";
 export const metadata = { title: "Criar conta" };
 
 export default async function SignupPage() {
-  if (await getActor()) redirect("/");
+  if (await getActor()) redirect("/painel");
   const segments = Object.entries(SEGMENTS).map(([key, v]) => ({ key, label: v.label, services: v.services }));
   return (
     <main className="min-h-dvh bg-mist px-4 py-8">
