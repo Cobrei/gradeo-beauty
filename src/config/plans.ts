@@ -41,7 +41,6 @@ export const FEATURES: FeatureRow[] = [
   { group: "Agenda", label: "Agenda do dia por profissional e visão da semana", basic: true, pro: true, mega: true },
   { label: "Encaixe, bloqueios, remarcação e lista de espera", basic: true, pro: true, mega: true },
   { label: "Agendamento online pelo link do salão", basic: true, pro: true, mega: true },
-  { label: "Sinal por Pix no agendamento online", basic: false, pro: "em breve", mega: "em breve" },
 
   { group: "Comanda e caixa", label: "Comanda com serviços, produtos e vários meios de pagamento", basic: true, pro: true, mega: true },
   { label: "Recibo pelo WhatsApp", basic: true, pro: true, mega: true },
