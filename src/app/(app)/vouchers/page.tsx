@@ -8,12 +8,18 @@ import { listServices } from "@/modules/catalog/application/use-cases";
 import { formatBRL, toCents } from "@/lib/money";
 import { formatBR, todayISO } from "@/lib/dates";
 import { addDays } from "@/lib/time";
+import { headers } from "next/headers";
+import { getSettings } from "@/modules/core/application/settings";
+import { ShareVoucher } from "@/components/ui/share-voucher";
 
 export const metadata = { title: "Vouchers" };
 
 export default async function VouchersPage() {
   const actor = await requireActor();
-  const [rows, services] = await Promise.all([listVouchers(actor), listServices(actor)]);
+  const [rows, services, salon] = await Promise.all([listVouchers(actor), listServices(actor), getSettings(actor)]);
+  const h = await headers();
+  const host = process.env.NEXT_PUBLIC_APP_HOST || h.get("host") || "";
+  const bookingUrl = `https://${host}/agendar/${salon.slug}`;
   const today = todayISO();
   return (
     <div>
@@ -33,7 +39,12 @@ export default async function VouchersPage() {
                       <td className="text-right">{v.uses}/{v.maxUses}</td>
                       <td className="text-right font-semibold">{formatBRL(toCents(redeemedTotal))}</td>
                       <td className="text-right">
+                        <div className="flex items-start justify-end gap-3">
+                        {v.status === "ACTIVE" && v.validUntil >= today && !clientName && (
+                          <ShareVoucher code={v.code} discount={v.kind === "PERCENT" ? `${Number(v.value)}%` : formatBRL(toCents(v.value))} until={formatBR(v.validUntil)} minOrder={toCents(v.minOrder) > 0 ? formatBRL(toCents(v.minOrder)) : undefined} salonName={salon.salonName} color={salon.brandColor ?? ""} bookingUrl={bookingUrl} />
+                        )}
                         <form action={voucherStatusAction}><input type="hidden" name="id" value={v.id} /><input type="hidden" name="status" value={v.status === "ACTIVE" ? "PAUSED" : "ACTIVE"} /><button className="text-xs text-muted underline">{v.status === "ACTIVE" ? "pausar" : "ativar"}</button></form>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -42,8 +53,9 @@ export default async function VouchersPage() {
             </Card>
           )}
         </div>
-        <Card title="Novo voucher genérico">
-          <Form action={createVoucherAction} submitLabel="Criar">
+        <Card title="Cadastrar voucher">
+          <p className="-mt-2 mb-3 text-xs text-muted">Código genérico para divulgar (Instagram, parceria, indicação). Depois de criar, use o botão <b>Instagram</b> na lista para gerar a arte.</p>
+          <Form action={createVoucherAction} submitLabel="Cadastrar voucher">
             <Field label="Nome" name="name"><input id="name" name="name" className="field" required placeholder="Ex.: Instagram outubro" /></Field>
             <Field label="Código (vazio = gera)" name="code"><input id="code" name="code" className="field uppercase" placeholder="BEMVINDA10" /></Field>
             <div className="grid grid-cols-2 gap-2">
