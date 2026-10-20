@@ -9,8 +9,9 @@ import { loginAction } from "@/modules/core/ui/actions";
 
 export const metadata = { title: "Entrar" };
 
-export default async function LoginPage() {
-  if (await getActor()) redirect("/");
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ demo?: string }> }) {
+  if (await getActor()) redirect("/painel");
+  const demo = (await searchParams).demo === "1";
   return (
     <main className="flex min-h-dvh items-center justify-center bg-ink px-4">
       <div className="w-full max-w-sm">
@@ -20,14 +21,15 @@ export default async function LoginPage() {
           </h1>
           <p className="text-sm text-white/70">{BRAND.tagline}</p>
         </div>
+        {demo && <p className="mb-3 rounded-xl bg-white/10 px-3 py-2 text-center text-sm text-white">Salão de demonstração: é só tocar em Entrar.</p>}
         <div className="card">
           <Form action={loginAction} submitLabel="Entrar">
             <>
               <Field label="E-mail" name="email">
-                <input id="email" name="email" type="email" autoComplete="username" required className="field" />
+                <input id="email" name="email" type="email" autoComplete="username" required defaultValue={demo ? "dona@salao.demo" : undefined} className="field" />
               </Field>
               <Field label="Senha" name="password">
-                <input id="password" name="password" type="password" autoComplete="current-password" required className="field" />
+                <input id="password" name="password" type="password" autoComplete="current-password" required defaultValue={demo ? "gradeo123" : undefined} className="field" />
               </Field>
             </>
           </Form>
