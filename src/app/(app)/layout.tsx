@@ -6,7 +6,7 @@ import { logoutAction } from "@/modules/core/ui/actions";
 import { can } from "@/lib/context";
 
 const NAV: { href: string; label: string; icon: string; action?: string; anyOf?: string[]; mobile?: boolean }[] = [
-  { href: "/", label: "Início", icon: "M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z", mobile: true },
+  { href: "/painel", label: "Início", icon: "M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z", mobile: true },
   { href: "/agenda", label: "Agenda", icon: "M4 5h16v15H4zM4 10h16M8 3v4M16 3v4", anyOf: ["agenda.appointment.read", "agenda.appointment.read_own"], mobile: true },
   { href: "/clientes", label: "Clientes", icon: "M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0z", action: "crm.client.read", mobile: true },
   { href: "/comandas", label: "Comandas", icon: "M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6", action: "pos.order.read", mobile: true },
@@ -46,7 +46,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between px-4 py-3 md:hidden">
-          <Link href="/">
+          <Link href="/painel">
             <Logo size={22} />
           </Link>
           <details className="relative">
