@@ -126,13 +126,13 @@ export function SignupForm({ segments, action }: Props) {
             {errors.password && <p className="mt-1 text-xs font-semibold text-bad">{errors.password}</p>}
           </div>
         </div>
-        <p className="text-xs text-muted">Ao criar a conta você concorda com o uso dos dados das suas clientes só para o seu salão, conforme a LGPD. Elas podem pedir para sair das mensagens a qualquer momento.</p>
+        <p className="text-xs text-muted">Ao iniciar o teste você concorda com o uso dos dados das suas clientes só para o seu salão, conforme a LGPD. Elas podem pedir para sair das mensagens a qualquer momento.</p>
         <div className="flex gap-2">
           <button type="button" onClick={() => setStep(2)} className="btn btn-secondary">
             Voltar
           </button>
           <button type="submit" disabled={pending} className="btn btn-primary flex-1">
-            {pending ? "Criando seu salão…" : "Criar meu salão"}
+            {pending ? "Preparando seu acesso…" : "Iniciar teste grátis"}
           </button>
         </div>
       </section>

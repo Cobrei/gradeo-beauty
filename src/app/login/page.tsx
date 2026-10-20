@@ -33,9 +33,9 @@ export default async function LoginPage() {
           </Form>
         </div>
         <p className="mt-5 text-center text-sm text-white/70">
-          Ainda não tem conta?{" "}
+          Ainda não usa o gradeo beauty?{" "}
           <Link href="/cadastro" className="font-semibold text-white underline">
-            Criar meu salão grátis
+            Comece o teste grátis de 30 dias
           </Link>
         </p>
       </div>

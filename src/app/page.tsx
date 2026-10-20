@@ -93,7 +93,7 @@ export default async function Home() {
                 Agenda, comanda, caixa, estoque, comissões e relatórios num só sistema, no celular ou no computador. E de bônus: ferramentas para trazer clientes novas e fazer quem sumiu voltar.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/cadastro" className="btn btn-primary px-6 text-lg">Criar meu salão grátis</Link>
+                <Link href="/cadastro" className="btn btn-primary px-6 text-lg">Começar teste grátis de 30 dias</Link>
                 <a href={WA} target="_blank" rel="noopener" className="btn btn-secondary px-6 text-lg">Pedir uma demonstração</a>
               </div>
               <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-ink-2">
@@ -333,7 +333,7 @@ export default async function Home() {
             <MirrorO size={48} ring="#e58aa0" />
             <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Comece hoje e feche o caixa de hoje já no gradeo beauty.</h2>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/cadastro" className="btn btn-primary px-6 text-lg">Criar meu salão grátis</Link>
+              <Link href="/cadastro" className="btn btn-primary px-6 text-lg">Começar teste grátis de 30 dias</Link>
               <a href={WA} target="_blank" rel="noopener" className="btn btn-wa px-6 text-lg">Falar no WhatsApp</a>
             </div>
           </div>

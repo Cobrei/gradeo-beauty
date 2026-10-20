@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
     <div className="space-y-5">
       {sp.bemvinda && (
         <Notice tone="ok">
-          Bem-vinda ao gradeo beauty, {actor.name.split(" ")[0]}! Seu salão está no ar. Próximo passo: <Link href="/clientes/importar" className="underline">importe suas clientes</Link> e dispare a primeira campanha hoje.
+          Bem-vinda ao gradeo beauty, {actor.name.split(" ")[0]}! Seu acesso está pronto, com 30 dias de todos os recursos do plano Pro. Próximo passo: cadastre a <Link href="/equipe" className="underline">equipe</Link> e <Link href="/clientes/importar" className="underline">importe suas clientes</Link>.
         </Notice>
       )}
       <div className="flex flex-wrap items-end justify-between gap-3">

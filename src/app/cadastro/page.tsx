@@ -6,7 +6,7 @@ import { signupAction } from "@/modules/core/ui/actions";
 import { SignupForm } from "@/modules/core/ui/signup-form";
 import { SEGMENTS } from "@/modules/catalog/domain/presets";
 
-export const metadata = { title: "Criar conta" };
+export const metadata = { title: "Teste grátis de 30 dias" };
 
 export default async function SignupPage() {
   if (await getActor()) redirect("/painel");
@@ -16,8 +16,8 @@ export default async function SignupPage() {
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-6 text-center">
           <Logo size={36} />
-          <h1 className="mt-3 text-2xl font-bold tracking-tight">Seu salão pronto em 3 minutos</h1>
-          <p className="text-sm text-muted">Agenda, comanda, caixa e as suas clientes de volta pelo WhatsApp. Sem cartão, sem fidelidade.</p>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight">Teste o gradeo beauty por 30 dias</h1>
+          <p className="text-sm text-muted">Configure seu negócio em 3 minutos e use todos os recursos do plano Pro: agenda, comanda, caixa, estoque e comissões. Sem cartão e sem fidelidade.</p>
         </div>
         <div className="card">
           <SignupForm segments={segments} action={signupAction} />
