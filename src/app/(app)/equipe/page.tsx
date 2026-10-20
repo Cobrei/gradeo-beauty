@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CopyHoursButton } from "@/components/ui/copy-hours";
 import { Avatar, Badge, Card, Field, LinkButton, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
@@ -68,6 +69,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
               <details open={custom}>
                 <summary className="cursor-pointer text-sm font-semibold text-brand">Horário próprio (diferente do salão)</summary>
                 <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" name="customHours" defaultChecked={custom} className="h-4 w-4 accent-[#b8475f]" /> Usar horário próprio</label>
+                <CopyHoursButton className="mt-2" />
                 <div className="mt-2 space-y-1">
                   {WEEKDAYS.map((d, i) => {
                     const h = editing?.workingHours[String(i)];

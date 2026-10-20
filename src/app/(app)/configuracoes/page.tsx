@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CopyHoursButton } from "@/components/ui/copy-hours";
 import { Card, Field, Notice, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { LogoUpload } from "@/components/ui/logo-upload";
@@ -37,6 +38,10 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
           </div>
         </Card>
         <Card title="Horário de funcionamento" className="mb-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted">Marque os dias abertos. Ajuste o primeiro dia e toque no botão para repetir o horário nos outros.</p>
+            <CopyHoursButton />
+          </div>
           <div className="space-y-1">
             {WEEKDAYS.map((d, i) => {
               const h = s.openingHours[String(i)];
