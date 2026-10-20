@@ -57,6 +57,13 @@
       "when": 1792451679480,
       "tag": "0007_retencao",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792451680480,
+      "tag": "0008_apelido_usuario",
+      "breakpoints": true
     }
   ]
 }

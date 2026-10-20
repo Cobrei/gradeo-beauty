@@ -17,7 +17,7 @@ import { markFeedbackHandledAction } from "@/modules/reports/ui/feedback-actions
 
 export const metadata = { title: "Início" };
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ bemvinda?: string }> }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ bemvinda?: string; salvo?: string }> }) {
   const actor = await requireActor();
   const sp = await searchParams;
   const today = todayISO();
@@ -32,9 +32,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
 
   return (
     <div className="space-y-5">
+      {sp.salvo && <Notice tone="ok">{sp.salvo === "perfil" ? "Pronto, vamos te chamar assim." : "Configurações salvas."}</Notice>}
       {sp.bemvinda && (
         <Notice tone="ok">
-          Bem-vinda ao gradeo beauty, {actor.name.split(" ")[0]}! Seu acesso está pronto, com 30 dias de todos os recursos do plano Pro. Próximo passo: cadastre a <Link href="/equipe" className="underline">equipe</Link> e <Link href="/clientes/importar" className="underline">importe suas clientes</Link>.
+          Bem-vinda ao gradeo beauty, {actor.nickname}! Seu acesso está pronto, com 30 dias de todos os recursos do plano Pro. Próximo passo: cadastre a <Link href="/equipe" className="underline">equipe</Link> e <Link href="/clientes/importar" className="underline">importe suas clientes</Link>.
         </Notice>
       )}
       <div className="flex flex-wrap items-end justify-between gap-3">

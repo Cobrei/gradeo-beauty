@@ -31,5 +31,5 @@ export async function saveSettingsAction(_p: ActionResult<unknown> | null, fd: F
     return toActionError(e);
   }
   revalidatePath("/", "layout");
-  redirect("/configuracoes?salvo=1");
+  redirect("/painel?salvo=config");
 }

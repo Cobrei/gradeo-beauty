@@ -35,6 +35,7 @@ export async function signupAction(_prev: ActionResult<unknown> | null, formData
         salonName: formData.get("salonName"),
         segments: formData.getAll("segments").map(String),
         ownerName: formData.get("ownerName"),
+        nickname: formData.get("nickname") || undefined,
         email: formData.get("email"),
         phone: formData.get("phone"),
         password: formData.get("password"),

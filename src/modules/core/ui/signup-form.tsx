@@ -123,9 +123,13 @@ export function SignupForm({ segments, action }: Props) {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label" htmlFor="ownerName">Seu nome</label>
+            <label className="label" htmlFor="ownerName">Seu nome completo</label>
             <input id="ownerName" name="ownerName" required className="field" />
             {errors.ownerName && <p className="mt-1 text-xs font-semibold text-bad">{errors.ownerName}</p>}
+          </div>
+          <div>
+            <label className="label" htmlFor="nickname">Como você quer ser chamado(a)?</label>
+            <input id="nickname" name="nickname" maxLength={60} className="field" placeholder="Ex.: Ana" />
           </div>
           <div>
             <label className="label" htmlFor="phone">Seu WhatsApp</label>

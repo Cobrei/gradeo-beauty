@@ -8,6 +8,8 @@ export interface Actor {
   tenantId: string;
   userId: string;
   name: string;
+  /** Como a pessoa quer ser chamada (padrão: primeiro nome). */
+  nickname?: string;
   permissions: Set<string>;
   /** unidades em que o usuário tem papel; vazio = todas as unidades do tenant */
   branchIds: string[];

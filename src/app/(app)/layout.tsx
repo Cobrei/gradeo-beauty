@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackBar } from "@/components/ui/back-bar";
 import { redirect } from "next/navigation";
 import { PoweredBy, SalonMark } from "@/components/ui/salon-brand";
 import { getSettings } from "@/modules/core/application/settings";
@@ -35,12 +36,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={salon.logoData} alt={salon.salonName} className="mx-auto max-h-14 max-w-full object-contain" />
-              <div className="mt-2 truncate text-center text-xs text-muted">{actor.name}</div>
             </>
           ) : (
             <>
               <SalonMark name={salon.salonName} logo={null} color={salon.brandColor} size={34} />
-              <div className="mt-1.5 truncate text-xs text-muted">{actor.name}</div>
             </>
           )}
         </Link>
@@ -52,6 +51,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
           ))}
         </nav>
+        <Link href="/perfil" className="mb-1 block truncate rounded-xl px-3 py-2 text-sm text-white/80 hover:bg-white/10" title="Como você quer ser chamado(a)">Olá, <b className="text-white">{actor.nickname}</b></Link>
         <form action={logoutAction}>
           <button className="w-full rounded-xl px-3 py-2 text-left text-sm text-white/70 hover:bg-white/10">Sair</button>
         </form>
@@ -70,13 +70,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   {n.label}
                 </Link>
               ))}
+              <Link href="/perfil" className="block rounded-lg px-3 py-2 text-sm text-ink-2 hover:bg-mist">Olá, <b>{actor.nickname}</b> · perfil</Link>
               <form action={logoutAction}>
                 <button className="w-full rounded-lg px-3 py-2 text-left text-sm text-muted hover:bg-mist">Sair</button>
               </form>
             </div>
           </details>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-2 md:px-8 md:pb-8 md:pt-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-2 md:px-8 md:pb-8 md:pt-6"><BackBar />{children}</main>
         <nav className="fixed inset-x-0 bottom-0 z-10 grid border-t border-line bg-white md:hidden" style={{ gridTemplateColumns: `repeat(${mobile.length}, 1fr)`, paddingBottom: "env(safe-area-inset-bottom)" }}>
           {mobile.map((n) => (
             <Link key={n.href} href={n.href} className="flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold text-ink-2">

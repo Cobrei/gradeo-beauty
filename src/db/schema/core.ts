@@ -46,6 +46,8 @@ export const users = pgTable(
     ...baseCols,
     personId: uuid("person_id"),
     name: varchar("name", { length: 120 }).notNull(),
+    /** Como a pessoa quer ser chamada (saudação). */
+    nickname: varchar("nickname", { length: 60 }),
     email: varchar("email", { length: 160 }).notNull(),
     passwordHash: text("password_hash").notNull(),
     isActive: boolean("is_active").notNull().default(true),

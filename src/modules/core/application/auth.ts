@@ -50,7 +50,7 @@ export const getActor = cache(async (): Promise<Actor | null> => {
   if (!token) return null;
   const now = new Date();
   const rows = await db
-    .select({ userId: users.id, tenantId: users.tenantId, name: users.name, isActive: users.isActive, tenantActive: tenants.isActive })
+    .select({ userId: users.id, tenantId: users.tenantId, name: users.name, nickname: users.nickname, isActive: users.isActive, tenantActive: tenants.isActive })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
     .innerJoin(tenants, eq(tenants.id, users.tenantId))
@@ -76,6 +76,7 @@ export const getActor = cache(async (): Promise<Actor | null> => {
     tenantId: u.tenantId,
     userId: u.userId,
     name: u.name,
+    nickname: u.nickname?.trim() || u.name.split(" ")[0],
     permissions,
     branchIds: [...new Set(branchIds)],
     correlationId: h.get("x-request-id") ?? randomBytes(8).toString("hex"),

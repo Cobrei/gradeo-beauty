@@ -13,6 +13,7 @@ export const signupSchema = z.object({
   salonName: z.string().trim().min(2, "Informe o nome do salão.").max(120),
   segments: z.array(z.string().refine((s) => s in SEGMENTS)).min(1, "Escolha pelo menos um tipo de negócio."),
   ownerName: z.string().trim().min(2, "Informe seu nome.").max(120),
+  nickname: z.string().trim().max(60).optional(),
   email: z.string().trim().toLowerCase().email("E-mail inválido."),
   phone: z.string().trim().min(10, "Informe o WhatsApp com DDD."),
   password: z.string().min(8, "Senha com pelo menos 8 caracteres."),
@@ -56,7 +57,7 @@ export async function signup(raw: unknown, userAgent?: string): Promise<{ tenant
       const [row] = await tx.insert(roles).values({ ...stamp, code, name: r.name, permissions: r.permissions as string[], isSystem: true }).returning();
       roleIds[code] = row.id;
     }
-    const [owner] = await tx.insert(users).values({ ...stamp, name: input.ownerName, email: input.email, passwordHash }).returning();
+    const [owner] = await tx.insert(users).values({ ...stamp, name: input.ownerName, nickname: input.nickname || null, email: input.email, passwordHash }).returning();
     await tx.insert(userRoles).values({ ...stamp, userId: owner.id, roleId: roleIds.OWNER });
 
     await tx.insert(salonSettings).values({ ...stamp, slug, segment: input.segments[0], whatsapp: phone, phone, openingHours: DEFAULT_HOURS, messageSenderName: input.salonName, onboardingDone: true });
