@@ -44,17 +44,17 @@ const TONE_BG: Record<Tone, string> = {
 export function Stat({ label, value, tone = "brand", hint, href }: { label: string; value: string | number; tone?: Tone; hint?: string; href?: string }) {
   const inner = (
     <>
-      <div className={`text-2xl font-bold sm:text-3xl ${TONE_TEXT[tone]}`}>{value}</div>
+      <div className={`whitespace-nowrap text-[clamp(1.05rem,12cqi,1.875rem)] font-bold leading-tight tabular-nums ${TONE_TEXT[tone]}`}>{value}</div>
       <div className="text-sm text-muted">{label}</div>
       {hint && <div className="mt-1 text-xs text-ink-2">{hint}</div>}
     </>
   );
   return href ? (
-    <Link href={href} className="card block hover:ring-2 hover:ring-brand/30">
+    <Link href={href} className="card @container block min-w-0 hover:ring-2 hover:ring-brand/30">
       {inner}
     </Link>
   ) : (
-    <div className="card">{inner}</div>
+    <div className="card @container min-w-0">{inner}</div>
   );
 }
 

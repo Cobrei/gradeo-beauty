@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Logo, MirrorO } from "@/components/ui/logo";
 import { MODULES } from "@/components/ui/modules";
 import { BRAND } from "@/config/brand";
@@ -31,7 +30,8 @@ const FAQ = [
 ];
 
 export default async function Home() {
-  if (await getActor()) redirect("/painel");
+  // quem já tem conta também vê o site (não redireciona); o topo oferece abrir o sistema
+  const logged = !!(await getActor());
 
   return (
     <div className="bg-[#fcfafb] text-ink">
@@ -48,8 +48,14 @@ export default async function Home() {
             <a href="#perguntas" className="hover:text-brand">Perguntas</a>
           </nav>
           <div className="flex-1" />
-          <Link href="/login" className="text-sm font-semibold text-ink-2 hover:text-brand">Entrar</Link>
-          <Link href="/cadastro" className="btn btn-primary btn-sm hidden sm:inline-flex">Testar grátis</Link>
+          {logged ? (
+            <Link href="/painel" className="btn btn-primary btn-sm">Abrir o sistema</Link>
+          ) : (
+            <>
+              <Link href="/login" className="text-sm font-semibold text-ink-2 hover:text-brand">Entrar</Link>
+              <Link href="/cadastro" className="btn btn-primary btn-sm hidden sm:inline-flex">Testar grátis</Link>
+            </>
+          )}
         </div>
       </header>
 
