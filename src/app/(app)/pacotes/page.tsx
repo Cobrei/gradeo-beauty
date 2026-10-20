@@ -26,7 +26,7 @@ export default async function PacotesPage({ searchParams }: { searchParams: Prom
               {packs.map((p) => {
                 const full = p.items.reduce((a, i) => a + (byId.get(i.serviceId) ? toCents(byId.get(i.serviceId)!.price) * i.qty : 0), 0);
                 return (
-                  <Card key={p.id} title={p.name} action={<a href={`/pacotes?editar=${p.id}`} className="text-sm text-brand">editar</a>}>
+                  <Card key={p.id} title={p.name} action={<a href={`/pacotes?editar=${p.id}`} className="btn btn-secondary btn-sm">Editar</a>}>
                     <ul className="text-sm">{p.items.map((i) => <li key={i.serviceId}>{i.qty}× {byId.get(i.serviceId)?.name ?? "serviço"}</li>)}</ul>
                     <div className="mt-2 text-lg font-bold">{formatBRL(toCents(p.price))} <span className="text-xs font-normal text-muted">{full > 0 ? `(avulso ${formatBRL(full)} · ${Math.round((1 - toCents(p.price) / full) * 100)}% off)` : ""} · válido {p.validityDays} dias</span></div>
                   </Card>
@@ -36,7 +36,7 @@ export default async function PacotesPage({ searchParams }: { searchParams: Prom
           )}
         </div>
         {(sp.novo || editing) && (
-          <Card title={editing ? "Editar pacote" : "Novo pacote"}>
+          <Card title={editing ? `Editar: ${editing.name}` : "Novo pacote"}>
             <Form action={savePackageAction} submitLabel="Salvar">
               {editing && <input type="hidden" name="id" value={editing.id} />}
               <Field label="Nome" name="name"><input id="name" name="name" className="field" required defaultValue={editing?.name ?? ""} /></Field>

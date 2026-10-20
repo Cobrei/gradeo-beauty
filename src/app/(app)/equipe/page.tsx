@@ -25,19 +25,20 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
   const custom = editing ? Object.keys(editing.workingHours).length > 0 : false;
   return (
     <div>
-      <PageHeader title="Equipe" subtitle="Quem atende, comissão, horários e acesso ao sistema." action={<LinkButton href="/equipe?novo=1">+ Profissional</LinkButton>} />
+      <PageHeader title="Equipe" subtitle="Toque em Editar para mudar nome, comissão, horários, serviços e acesso de cada pessoa." action={<LinkButton href="/equipe?novo=1">+ Profissional</LinkButton>} />
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="p-0">
             <ul className="divide-y divide-line">
               {pros.map((p) => (
-                <li key={p.id} className={`flex items-center gap-3 px-4 py-3 ${!p.isActive ? "opacity-50" : ""}`}>
+                <li key={p.id} className={`flex items-center gap-3 px-4 py-3 ${!p.isActive ? "opacity-50" : ""} ${editing?.id === p.id ? "bg-brand-soft/60" : ""}`}>
                   <Avatar name={p.name} color={p.color} />
                   <div className="min-w-0 flex-1">
                     <Link href={`/equipe?editar=${p.id}`} className="font-semibold hover:underline">{p.name}</Link>{p.nickname && <span className="text-muted"> ({p.nickname})</span>}
                     <div className="text-xs text-muted">{formatPhone(p.phone)} · comissão {Number(p.commissionPct)}% serviços / {Number(p.productCommissionPct)}% produtos{p.userId ? " · tem acesso" : ""}{!p.acceptsOnline ? " · fora do online" : ""}{settings.partnerMode ? (p.cnpj ? ` · CNPJ ${formatCnpj(p.cnpj)}` : " · sem CNPJ") : ""}</div>
                   </div>
                   {!p.isActive && <Badge tone="mist">inativa</Badge>}
+                  <Link href={`/equipe?editar=${p.id}`} className="btn btn-secondary btn-sm shrink-0">Editar</Link>
                 </li>
               ))}
             </ul>

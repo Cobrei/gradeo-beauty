@@ -28,7 +28,7 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Pro
           ) : (
             <Card className="overflow-x-auto p-0">
               <table className="tbl">
-                <thead><tr><th>Produto</th><th className="text-right">Estoque</th><th className="text-right">Venda</th><th className="text-right">Custo</th></tr></thead>
+                <thead><tr><th>Produto</th><th className="text-right">Estoque</th><th className="text-right">Venda</th><th className="text-right">Custo</th><th></th></tr></thead>
                 <tbody>
                   {all.map((p) => {
                     const low = Number(p.minStock) > 0 && Number(p.stockQty) <= Number(p.minStock);
@@ -41,6 +41,7 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Pro
                         <td className="text-right">{Number(p.stockQty)} {p.unit} {low && <Badge tone="bad">baixo</Badge>}</td>
                         <td className="text-right font-semibold">{p.forSale ? formatBRL(toCents(p.salePrice)) : "—"}</td>
                         <td className="text-right text-muted">{formatBRL(toCents(p.costPrice))}</td>
+                        <td className="whitespace-nowrap text-right"><Link href={`/produtos?editar=${p.id}`} className="btn btn-secondary btn-sm">Editar</Link> <Link href={`/produtos/${p.id}`} className="btn btn-ghost btn-sm">Estoque</Link></td>
                       </tr>
                     );
                   })}
@@ -50,7 +51,7 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Pro
           )}
         </div>
         {showForm && (
-          <Card title={editing ? "Editar produto" : "Novo produto"}>
+          <Card title={editing ? `Editar: ${editing.name}` : "Novo produto"}>
             <Form action={saveProductAction} submitLabel="Salvar">
               {editing && <input type="hidden" name="id" value={editing.id} />}
               <Field label="Nome" name="name"><input id="name" name="name" className="field" required defaultValue={editing?.name ?? ""} /></Field>
