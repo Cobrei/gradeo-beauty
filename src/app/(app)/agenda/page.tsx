@@ -8,13 +8,37 @@ import { todayISO } from "@/lib/dates";
 import { addDays, dateToLocal, formatLongDate, hhmm, minutesOf } from "@/lib/time";
 import { formatBRL } from "@/lib/money";
 import { toCents } from "@/lib/money";
+import { WeekView } from "./semana";
 
 export const metadata = { title: "Agenda" };
 
-export default async function AgendaPage({ searchParams }: { searchParams: Promise<{ d?: string; aviso?: string; erro?: string }> }) {
+export default async function AgendaPage({ searchParams }: { searchParams: Promise<{ d?: string; aviso?: string; erro?: string; v?: string; pro?: string }> }) {
   const actor = await requireActor();
   const sp = await searchParams;
   const date = /^\d{4}-\d{2}-\d{2}$/.test(sp.d ?? "") ? sp.d! : todayISO();
+  const toggle = (
+    <div className="inline-flex rounded-xl bg-mist p-1" role="tablist" aria-label="Visão da agenda">
+      <Link href={`/agenda?d=${date}`} className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${sp.v !== "semana" ? "bg-white text-ink shadow-sm" : "text-ink-2"}`}>Dia</Link>
+      <Link href={`/agenda?v=semana&d=${date}`} className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${sp.v === "semana" ? "bg-white text-ink shadow-sm" : "text-ink-2"}`}>Semana</Link>
+    </div>
+  );
+  if (sp.v === "semana") {
+    return (
+      <div>
+        <PageHeader
+          title="Agenda da semana"
+          action={
+            <>
+              {toggle}
+              {can(actor, "agenda.appointment.write") && <LinkButton href={`/agenda/novo?d=${date}`}>+ Agendar</LinkButton>}
+              {can(actor, "agenda.block.write") && <LinkButton href={`/agenda/bloqueio?d=${date}`} variant="secondary">Bloquear</LinkButton>}
+            </>
+          }
+        />
+        <WeekView actor={actor} date={date} pro={sp.pro} />
+      </div>
+    );
+  }
   const { pros, appts, blocks, salonWindow } = await dayAgenda(actor, date);
 
   // Grade: do início ao fim do expediente (ou 8h–20h), em passos de 30 min.
@@ -37,6 +61,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
         subtitle={<span className="capitalize">{formatLongDate(date)}</span>}
         action={
           <>
+            {toggle}
             <Link href={`/agenda?d=${addDays(date, -1)}`} className="btn btn-secondary btn-sm" aria-label="Dia anterior">‹</Link>
             <Link href={`/agenda?d=${todayISO()}`} className="btn btn-secondary btn-sm">Hoje</Link>
             <Link href={`/agenda?d=${addDays(date, 1)}`} className="btn btn-secondary btn-sm" aria-label="Próximo dia">›</Link>

@@ -8,7 +8,7 @@ import { DomainError, NotFoundError } from "@/lib/errors";
 import { fromCents, toCents } from "@/lib/money";
 import { normalizePhone } from "@/lib/phone";
 import { todayISO } from "@/lib/dates";
-import { addMinutes, dateToLocal, dayRange, localToDate, minutesOf, weekdayOf } from "@/lib/time";
+import { addDays, addMinutes, dateToLocal, dayRange, localToDate, minutesOf, weekdayOf } from "@/lib/time";
 import { getSettings } from "@/modules/core/application/settings";
 import { myProfessionalId } from "@/modules/team/application/use-cases";
 import { canTransition, freeSlots, overlaps, workWindow, type Busy } from "../domain/slots";
@@ -33,10 +33,19 @@ export interface DayAppointment {
 
 /** Agenda do dia: profissionais ativos + atendimentos + bloqueios. Profissional só vê a própria. */
 export async function dayAgenda(actor: Actor, dateISO: string) {
+  const r = await agendaRange(actor, dateISO, 1);
+  const weekday = weekdayOf(dateISO);
+  const salonWindow = r.settings.openingHours[String(weekday)] ?? null;
+  return { ...r, salonWindow, weekday };
+}
+
+/** Agenda de vários dias (visão semanal). */
+export async function agendaRange(actor: Actor, startISO: string, days: number) {
   const own = !can(actor, "agenda.appointment.read") && can(actor, "agenda.appointment.read_own");
   if (!own) assertCan(actor, "agenda.appointment.read");
   const mine = own ? await myProfessionalId(actor) : null;
-  const { start, end } = dayRange(dateISO);
+  const start = dayRange(startISO).start;
+  const end = dayRange(addDays(startISO, days - 1)).end;
   const settings = await getSettings(actor);
   return withTenantRead(actor, async (tx) => {
     const pros = await tx
@@ -68,9 +77,7 @@ export async function dayAgenda(actor: Actor, dateISO: string) {
       .where(and(isNull(appointments.deletedAt), gte(appointments.startsAt, start), lt(appointments.startsAt, end), mine ? eq(appointments.professionalId, mine) : undefined, ne(appointments.status, "CANCELLED")))
       .orderBy(asc(appointments.startsAt));
     const blocks = await tx.select().from(agendaBlocks).where(and(isNull(agendaBlocks.deletedAt), lt(agendaBlocks.startsAt, end), gte(agendaBlocks.endsAt, start)));
-    const weekday = weekdayOf(dateISO);
-    const salonWindow = settings.openingHours[String(weekday)] ?? null;
-    return { pros, appts, blocks, settings, salonWindow, weekday };
+    return { pros, appts, blocks, settings };
   });
 }
 
