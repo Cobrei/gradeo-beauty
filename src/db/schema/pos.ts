@@ -109,6 +109,9 @@ export const commissionClosings = pgTable(
     itemsJson: jsonb("items_json").notNull(),
     status: varchar("status", { length: 8 }).notNull().default("CLOSED"), // CLOSED, PAID
     paidAt: timestamp("paid_at", { withTimezone: true }),
+    /** NF-e do repasse: número e quando foi marcada como enviada. */
+    nfNumber: varchar("nf_number", { length: 40 }),
+    nfAt: timestamp("nf_at", { withTimezone: true }),
   },
   (t) => [index("ix_comm_closings").on(t.tenantId, t.professionalId, t.fromDate)],
 );

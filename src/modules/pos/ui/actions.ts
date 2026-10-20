@@ -5,7 +5,7 @@ import { requireActor } from "@/modules/core/application/auth";
 import { toActionError, type ActionResult } from "@/lib/errors";
 import { toCents } from "@/lib/money";
 import { addCashMove, addItem, applyVoucher, cancelOrder, closeCashSession, openCashSession, openOrder, payOrder, removeItem, removeVoucher, setDiscount } from "../application/orders";
-import { closeCommission, markClosingPaid } from "../application/commissions";
+import { closeCommission, markClosingPaid, setClosingNf } from "../application/commissions";
 
 const money = (v: FormDataEntryValue | null) => toCents(String(v || "0"));
 
@@ -160,4 +160,12 @@ export async function removeVoucherAction(fd: FormData) {
   await removeVoucher(actor, orderId);
   revalidatePath(`/comandas/${orderId}`);
   redirect(`/comandas/${orderId}`);
+}
+
+export async function setClosingNfAction(fd: FormData) {
+  const actor = await requireActor();
+  const clear = fd.get("clear") === "1";
+  await setClosingNf(actor, String(fd.get("id")), clear ? null : String(fd.get("nf") ?? "") || "s/n");
+  revalidatePath("/comissoes");
+  redirect("/comissoes?aba=fechamentos");
 }

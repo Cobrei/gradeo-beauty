@@ -91,6 +91,15 @@ export async function markClosingPaid(actor: Actor, id: string) {
   });
 }
 
+/** Marca (ou desmarca) a NF-e do fechamento como enviada, com o número da nota. */
+export async function setClosingNf(actor: Actor, id: string, nfNumber: string | null) {
+  assertCan(actor, "commission.close");
+  const n = nfNumber?.trim().slice(0, 40) || null;
+  return withTenantTx(actor, async (tx, ctx) => {
+    await tx.update(commissionClosings).set(n ? { nfNumber: n, nfAt: new Date(), ...ctx.stampUpdate() } : { nfNumber: null, nfAt: null, ...ctx.stampUpdate() }).where(eq(commissionClosings.id, id));
+  });
+}
+
 /** Lei do Salão-Parceiro: cota-parte de cada profissional x do salão no período (base para a nota e o contador). */
 export async function partnerReport(actor: Actor, from: string, to: string) {
   assertCan(actor, "commission.read_all");

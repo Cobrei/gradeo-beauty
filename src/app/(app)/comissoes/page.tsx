@@ -5,7 +5,7 @@ import { requireActor } from "@/modules/core/application/auth";
 import { commissionDetail, commissionReport, listClosings, partnerReport } from "@/modules/pos/application/commissions";
 import { getSettings } from "@/modules/core/application/settings";
 import { formatCnpj } from "@/lib/cnpj";
-import { closeCommissionAction, markClosingPaidAction } from "@/modules/pos/ui/actions";
+import { closeCommissionAction, markClosingPaidAction, setClosingNfAction } from "@/modules/pos/ui/actions";
 import { can } from "@/lib/context";
 import { formatBRL, toCents } from "@/lib/money";
 import { firstOfMonth, formatBR, lastOfMonth, todayISO } from "@/lib/dates";
@@ -120,9 +120,11 @@ export default async function ComissoesPage({ searchParams }: { searchParams: Pr
       )}
       {aba === "fechamentos" && (
         closings.length === 0 ? <EmptyState title="Nenhum fechamento ainda" /> : (
+          <>
+          <p className="mb-3 text-sm text-muted">Controle do salão: marque quando a NF-e do repasse foi enviada (informe o número, se tiver). {closings.filter(({ closing: c }) => !c.nfAt).length > 0 ? <b className="text-warn">{closings.filter(({ closing: c }) => !c.nfAt).length} fechamento(s) com NF-e pendente.</b> : <b className="text-ok">Todas as NF-e marcadas.</b>}</p>
           <Card className="overflow-x-auto p-0">
             <table className="tbl">
-              <thead><tr><th>Profissional</th><th>Período</th><th className="text-right">Comissão</th><th>Status</th><th></th></tr></thead>
+              <thead><tr><th>Profissional</th><th>Período</th><th className="text-right">Comissão</th><th>Pagamento</th><th>NF-e</th><th></th></tr></thead>
               <tbody>
                 {closings.map(({ closing: c, professionalName }) => (
                   <tr key={c.id}>
@@ -130,12 +132,31 @@ export default async function ComissoesPage({ searchParams }: { searchParams: Pr
                     <td>{formatBR(c.fromDate)} – {formatBR(c.toDate)}</td>
                     <td className="text-right font-bold">{formatBRL(toCents(c.commissionTotal))}</td>
                     <td><Badge tone={c.status === "PAID" ? "ok" : "warn"}>{c.status === "PAID" ? "pago" : "a pagar"}</Badge></td>
+                    <td>
+                      {c.nfAt ? (
+                        <div className="flex items-center gap-2">
+                          <Badge tone="ok">NF-e enviada{c.nfNumber && c.nfNumber !== "s/n" ? ` nº ${c.nfNumber}` : ""}</Badge>
+                          {can(actor, "commission.close") && (
+                            <form action={setClosingNfAction}><input type="hidden" name="id" value={c.id} /><input type="hidden" name="clear" value="1" /><button className="text-xs text-muted underline" title="Desmarcar NF-e">desfazer</button></form>
+                          )}
+                        </div>
+                      ) : can(actor, "commission.close") ? (
+                        <form action={setClosingNfAction} className="flex items-center gap-1">
+                          <input type="hidden" name="id" value={c.id} />
+                          <input name="nf" placeholder="nº da NF-e" className="field min-h-8 w-28 px-2 py-1 text-xs" />
+                          <button className="btn btn-secondary btn-sm whitespace-nowrap">Marcar enviada</button>
+                        </form>
+                      ) : (
+                        <Badge tone="warn">pendente</Badge>
+                      )}
+                    </td>
                     <td className="text-right">{c.status !== "PAID" && can(actor, "commission.close") && (<form action={markClosingPaidAction}><input type="hidden" name="id" value={c.id} /><button className="btn btn-secondary btn-sm">Marcar pago</button></form>)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </Card>
+          </>
         )
       )}
       {!can(actor, "commission.read_all") && <p className="mt-4 text-xs text-muted">Você vê só as suas comissões.</p>}
