@@ -11,6 +11,7 @@ import { todayISO, formatBR } from "@/lib/dates";
 import { formatLongDate, localTime } from "@/lib/time";
 import { APPT_STATUS } from "@/modules/agenda/domain/slots";
 import { formatPhone } from "@/lib/phone";
+import { ModuleGrid } from "@/components/ui/modules";
 
 export const metadata = { title: "Início" };
 
@@ -44,6 +45,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
           {can(actor, "pos.order.write") && <LinkButton href="/comandas/nova" variant="secondary">+ Comanda</LinkButton>}
         </div>
       </div>
+
+      <ModuleGrid actor={actor} />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Faturado hoje" value={formatBRL(d.revenueToday)} hint={`${d.ordersToday} comanda${d.ordersToday === 1 ? "" : "s"} · mês ${formatBRL(d.revenueMonth)}`} tone="ok" href={can(actor, "report.read") ? "/relatorios" : undefined} />

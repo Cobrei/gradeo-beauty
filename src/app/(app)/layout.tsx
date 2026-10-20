@@ -10,7 +10,7 @@ const NAV: { href: string; label: string; icon: string; action?: string; anyOf?:
   { href: "/agenda", label: "Agenda", icon: "M4 5h16v15H4zM4 10h16M8 3v4M16 3v4", anyOf: ["agenda.appointment.read", "agenda.appointment.read_own"], mobile: true },
   { href: "/clientes", label: "Clientes", icon: "M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0z", action: "crm.client.read", mobile: true },
   { href: "/comandas", label: "Comandas", icon: "M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6", action: "pos.order.read", mobile: true },
-  { href: "/campanhas", label: "Campanhas", icon: "M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15 9a3 3 0 010 6M18 6a7 7 0 010 12", action: "mkt.campaign.manage", mobile: true },
+  { href: "/campanhas", label: "Campanhas", icon: "M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15 9a3 3 0 010 6M18 6a7 7 0 010 12", action: "mkt.campaign.manage" },
   { href: "/caixa", label: "Caixa", icon: "M3 7h18v12H3zM3 11h18M7 15h3", action: "pos.cash.read" },
   { href: "/comissoes", label: "Comissões", icon: "M12 3v18M16 7H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H7", anyOf: ["commission.read_all", "commission.read_own"] },
   { href: "/relatorios", label: "Relatórios", icon: "M4 20V10M10 20V4M16 20v-7M22 20H2", action: "report.read" },
@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const actor = await getActor();
   if (!actor) redirect("/login");
   const nav = NAV.filter((n) => (!n.action || can(actor, n.action)) && (!n.anyOf || n.anyOf.some((a) => can(actor, a))));
-  const mobile = nav.filter((n) => n.mobile);
+  const mobile = [...nav.filter((n) => n.mobile), { href: "/mais", label: "Mais", icon: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" }];
   return (
     <div className="flex min-h-dvh">
       <aside className="hidden w-60 shrink-0 flex-col bg-ink px-3 py-5 text-white md:flex">
