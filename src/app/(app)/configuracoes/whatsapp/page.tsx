@@ -24,8 +24,10 @@ export default async function WhatsappPage({ searchParams }: { searchParams: Pro
 
       {!st.configured ? (
         <Card>
-          <h2 className="font-bold">Em ativação</h2>
-          <p className="mt-1 text-sm text-ink-2">O envio automático pelo WhatsApp do salão está sendo ligado. Enquanto isso, a fila de mensagens funciona no modo manual: um toque abre o WhatsApp com o texto pronto.</p>
+          <h2 className="font-bold">Envio automático: disponível em breve</h2>
+          <p className="mt-1 text-sm text-ink-2">A conexão do WhatsApp do salão por QR code está em fase final de liberação. Você não precisa fazer nada agora: os lembretes, confirmações e recibos já ficam prontos na fila de envio e saem com um toque pelo seu WhatsApp.</p>
+          <p className="mt-2 text-sm text-ink-2">Assim que a conexão for liberada, este espaço mostra o QR code para você escanear com o celular do salão.</p>
+          <Link href="/mensagens" className="btn btn-primary btn-sm mt-4">Abrir a fila de envio</Link>
         </Card>
       ) : connected ? (
         <Card>
