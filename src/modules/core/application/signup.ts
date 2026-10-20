@@ -11,7 +11,7 @@ import { hashPassword, login } from "./auth";
 
 export const signupSchema = z.object({
   salonName: z.string().trim().min(2, "Informe o nome do salão.").max(120),
-  segment: z.string().refine((s) => s in SEGMENTS, "Escolha o tipo de negócio."),
+  segments: z.array(z.string().refine((s) => s in SEGMENTS)).min(1, "Escolha pelo menos um tipo de negócio."),
   ownerName: z.string().trim().min(2, "Informe seu nome.").max(120),
   email: z.string().trim().toLowerCase().email("E-mail inválido."),
   phone: z.string().trim().min(10, "Informe o WhatsApp com DDD."),
@@ -42,8 +42,9 @@ export async function signup(raw: unknown, userAgent?: string): Promise<{ tenant
 
   const slug = await uniqueSlug(input.salonName);
   const passwordHash = await hashPassword(input.password);
-  const preset = SEGMENTS[input.segment];
-  const chosen = preset.services.filter((s) => input.serviceNames.includes(s.name));
+  // vários tipos de negócio: junta os serviços de todos, sem repetir nome
+  const seen = new Set<string>();
+  const chosen = input.segments.flatMap((k) => SEGMENTS[k].services).filter((s) => input.serviceNames.includes(s.name) && !seen.has(s.name) && seen.add(s.name));
 
   const tenantId = await db.transaction(async (tx) => {
     const [t] = await tx.insert(tenants).values({ name: input.salonName }).returning();
@@ -58,7 +59,7 @@ export async function signup(raw: unknown, userAgent?: string): Promise<{ tenant
     const [owner] = await tx.insert(users).values({ ...stamp, name: input.ownerName, email: input.email, passwordHash }).returning();
     await tx.insert(userRoles).values({ ...stamp, userId: owner.id, roleId: roleIds.OWNER });
 
-    await tx.insert(salonSettings).values({ ...stamp, slug, segment: input.segment, whatsapp: phone, phone, openingHours: DEFAULT_HOURS, messageSenderName: input.salonName, onboardingDone: true });
+    await tx.insert(salonSettings).values({ ...stamp, slug, segment: input.segments[0], whatsapp: phone, phone, openingHours: DEFAULT_HOURS, messageSenderName: input.salonName, onboardingDone: true });
 
     if (chosen.length) {
       await tx.insert(services).values(

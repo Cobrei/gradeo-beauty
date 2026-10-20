@@ -33,7 +33,7 @@ export async function signupAction(_prev: ActionResult<unknown> | null, formData
     await signup(
       {
         salonName: formData.get("salonName"),
-        segment: formData.get("segment"),
+        segments: formData.getAll("segments").map(String),
         ownerName: formData.get("ownerName"),
         email: formData.get("email"),
         phone: formData.get("phone"),

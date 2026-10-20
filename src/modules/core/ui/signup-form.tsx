@@ -12,16 +12,26 @@ interface Props {
 /** Cadastro em 3 passos, uma tela só: negócio → serviços → acesso. */
 export function SignupForm({ segments, action }: Props) {
   const [state, formAction, pending] = useActionState(action, null);
-  const [segment, setSegment] = useState(segments[0].key);
+  const [picked, setPicked] = useState<string[]>([segments[0].key]);
   const [step, setStep] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set(segments[0].services.map((s) => s.name)));
   const [pros, setPros] = useState<string[]>([""]);
   const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
-  const seg = segments.find((s) => s.key === segment)!;
+  const chosenSegs = segments.filter((s) => picked.includes(s.key));
+  // serviços de todos os tipos marcados, sem repetir
+  const seenNames = new Set<string>();
+  const groups = chosenSegs.map((s) => ({ ...s, services: s.services.filter((x) => !seenNames.has(x.name) && seenNames.add(x.name)) })).filter((g) => g.services.length);
 
   function pickSegment(key: string) {
-    setSegment(key);
-    setSelected(new Set(segments.find((s) => s.key === key)!.services.map((s) => s.name)));
+    const on = picked.includes(key);
+    if (on && picked.length === 1) return; // pelo menos um
+    const next = on ? picked.filter((k) => k !== key) : [...picked, key];
+    setPicked(next);
+    const svc = segments.find((s) => s.key === key)!.services.map((s) => s.name);
+    const n = new Set(selected);
+    if (on) svc.forEach((name) => { if (!next.some((k) => segments.find((s) => s.key === k)!.services.some((x) => x.name === name))) n.delete(name); });
+    else svc.forEach((name) => n.add(name));
+    setSelected(n);
   }
   function toggle(name: string) {
     const n = new Set(selected);
@@ -52,15 +62,16 @@ export function SignupForm({ segments, action }: Props) {
           {errors.salonName && <p className="mt-1 text-xs font-semibold text-bad">{errors.salonName}</p>}
         </div>
         <div>
-          <span className="label">Tipo de negócio</span>
+          <span className="label">Tipo de negócio <span className="font-normal text-muted">(marque todos que se aplicam)</span></span>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {segments.map((s) => (
-              <button type="button" key={s.key} onClick={() => pickSegment(s.key)} className={`rounded-xl border px-3 py-3 text-left text-sm font-semibold ${segment === s.key ? "border-brand bg-brand-soft text-brand" : "border-line bg-white"}`}>
+              <button type="button" key={s.key} onClick={() => pickSegment(s.key)} aria-pressed={picked.includes(s.key)} className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm font-semibold ${picked.includes(s.key) ? "border-brand bg-brand-soft text-brand" : "border-line bg-white"}`}>
+                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${picked.includes(s.key) ? "border-brand bg-brand text-white" : "border-line"}`}>{picked.includes(s.key) ? "✓" : ""}</span>
                 {s.label}
               </button>
             ))}
           </div>
-          <input type="hidden" name="segment" value={segment} />
+          {picked.map((k) => <input key={k} type="hidden" name="segments" value={k} />)}
         </div>
         <button type="button" onClick={() => setStep(2)} className="btn btn-primary w-full">
           Continuar
@@ -69,8 +80,12 @@ export function SignupForm({ segments, action }: Props) {
 
       <section className={step === 2 ? "space-y-4" : "hidden"}>
         <p className="text-sm text-muted">Marque o que você faz. Preços e tempos vêm prontos e você ajusta depois.</p>
+        <p className="rounded-xl bg-gold-soft px-3 py-2 text-sm text-[#8a6420]"><b>Não encontrou algum serviço?</b> Sem problema: depois do cadastro, em <b>Serviços</b>, você inclui quantos quiser, com o seu preço e o seu tempo.</p>
+        {groups.map((g) => (
+        <div key={g.key}>
+        {groups.length > 1 && <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">{g.label}</div>}
         <div className="grid gap-2 sm:grid-cols-2">
-          {seg.services.map((s) => (
+          {g.services.map((s) => (
             <label key={s.name} className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-sm ${selected.has(s.name) ? "border-brand bg-brand-soft" : "border-line bg-white"}`}>
               <span className="flex items-center gap-2">
                 <input type="checkbox" name="serviceNames" value={s.name} checked={selected.has(s.name)} onChange={() => toggle(s.name)} className="h-4 w-4 accent-[#b8475f]" />
@@ -82,6 +97,8 @@ export function SignupForm({ segments, action }: Props) {
             </label>
           ))}
         </div>
+        </div>
+        ))}
         <div className="flex gap-2">
           <button type="button" onClick={() => setStep(1)} className="btn btn-secondary">
             Voltar
