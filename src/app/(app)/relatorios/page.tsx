@@ -81,7 +81,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: P
             </div>
           </Card>
         )}
-        <Card title="Retenção: de quem veio no mês, quantas voltaram em 60 dias" className="lg:col-span-2">
+        <Card title="Retorno de clientes mês a mês: das que vieram pela primeira vez, quantas voltaram em 60 dias" className="lg:col-span-2">
           {cohorts.length === 0 ? <p className="text-sm text-muted">Precisa de pelo menos dois meses de comandas.</p> : (
             <table className="tbl">
               <thead><tr><th>Mês</th><th className="text-right">Clientes</th><th className="text-right">Voltaram</th><th className="text-right">Retenção</th></tr></thead>

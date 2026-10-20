@@ -99,7 +99,7 @@ export default async function Home() {
               <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-ink-2">
                 <li>✓ Cadastro em 3 minutos</li>
                 <li>✓ Funciona no celular</li>
-                <li>✓ {TRIAL_DAYS} dias grátis, sem cartão</li>
+                <li>✓ {TRIAL_DAYS} dias grátis com tudo do Pro, sem cartão</li>
               </ul>
             </div>
             <div className="relative">
@@ -190,7 +190,7 @@ export default async function Home() {
         {/* bônus: clientes vindo e voltando */}
         <section id="bonus" className="scroll-mt-20">
           <div className="mx-auto max-w-6xl px-4 pt-16 md:px-8 md:pt-24">
-            <p className="text-xs font-bold uppercase tracking-wider text-gold">Bônus de quem organiza</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#8a6420]">Bônus de quem organiza</p>
             <h2 className="mt-2 max-w-3xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Com o salão organizado, o sistema ainda ajuda a cliente a vir e a voltar</h2>
             <p className="mt-3 max-w-2xl text-ink-2">Cada atendimento registrado vira histórico. Com ele, o gradeo beauty mostra quem está atrasada no ciclo, quem sumiu e quem faz aniversário, e prepara a mensagem certa.</p>
           </div>
@@ -331,7 +331,7 @@ export default async function Home() {
         <section className="bg-ink text-white">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-16 text-center md:px-8">
             <MirrorO size={48} ring="#e58aa0" />
-            <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Comece hoje e mande a primeira campanha antes do fim do dia.</h2>
+            <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Comece hoje e feche o caixa de hoje já no gradeo beauty.</h2>
             <div className="flex flex-wrap justify-center gap-3">
               <Link href="/cadastro" className="btn btn-primary px-6 text-lg">Criar meu salão grátis</Link>
               <a href={WA} target="_blank" rel="noopener" className="btn btn-wa px-6 text-lg">Falar no WhatsApp</a>

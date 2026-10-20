@@ -6,7 +6,7 @@ export type Cell = boolean | string;
 export type FeatureRow = { label: string; basic: Cell; pro: Cell; mega: Cell; group?: string };
 
 export const TRIAL_DAYS = 30;
-export const PROMO_NOTE = `${TRIAL_DAYS} dias grátis, sem cartão e sem fidelidade. No plano anual, 2 meses de presente.`;
+export const PROMO_NOTE = `${TRIAL_DAYS} dias grátis com todos os recursos do Pro, sem cartão e sem fidelidade. No fim do teste, você escolhe o plano. No plano anual, 2 meses de presente.`;
 
 export const PLANS: Plan[] = [
   {
@@ -29,7 +29,7 @@ export const PLANS: Plan[] = [
     name: "Mega",
     price: 79.9,
     who: "Para operações maiores",
-    items: ["Até 12 profissionais", "Tudo do Pro", "Coortes de retenção", "Opção de WhatsApp oficial (Meta)", "Migração assistida da sua base", "Suporte prioritário"],
+    items: ["Até 12 profissionais", "Tudo do Pro", "Retorno de clientes mês a mês", "Opção de WhatsApp oficial (Meta)", "Migração assistida da sua base", "Suporte prioritário"],
   },
 ];
 
@@ -68,7 +68,7 @@ export const FEATURES: FeatureRow[] = [
 
   { group: "Gestão", label: "Relatório de faturamento, ticket e meios de pagamento", basic: true, pro: true, mega: true },
   { label: "Relatórios por profissional e serviço, novas × recorrentes, faltas", basic: false, pro: true, mega: true },
-  { label: "Coortes de retenção", basic: false, pro: false, mega: true },
+  { label: "Retorno de clientes mês a mês", basic: false, pro: false, mega: true },
   { label: "Perfis de acesso", basic: "Dona e recepção", pro: "Todos", mega: "Todos" },
   { label: "Funciona no celular (instala pelo navegador)", basic: true, pro: true, mega: true },
   { label: "Suporte", basic: "WhatsApp", pro: "WhatsApp", mega: "Prioritário + migração" },
