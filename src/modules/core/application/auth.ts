@@ -5,7 +5,7 @@ import { hash, verify } from "@node-rs/argon2";
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import { db } from "@/db/client";
-import { roles, sessions, userRoles, users } from "@/db/schema";
+import { roles, sessions, tenants, userRoles, users } from "@/db/schema";
 import type { Actor } from "@/lib/context";
 import { DomainError } from "@/lib/errors";
 
@@ -50,13 +50,14 @@ export const getActor = cache(async (): Promise<Actor | null> => {
   if (!token) return null;
   const now = new Date();
   const rows = await db
-    .select({ userId: users.id, tenantId: users.tenantId, name: users.name, isActive: users.isActive })
+    .select({ userId: users.id, tenantId: users.tenantId, name: users.name, isActive: users.isActive, tenantActive: tenants.isActive })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
+    .innerJoin(tenants, eq(tenants.id, users.tenantId))
     .where(and(eq(sessions.id, sessionId(token)), gt(sessions.expiresAt, now)))
     .limit(1);
   const u = rows[0];
-  if (!u || !u.isActive) return null;
+  if (!u || !u.isActive || !u.tenantActive) return null;
 
   const grants = await db
     .select({ permissions: roles.permissions, branchId: userRoles.branchId })

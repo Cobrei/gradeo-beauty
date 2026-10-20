@@ -10,6 +10,8 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
 const shot = (n) => page.screenshot({ path: `e2e/shots/${n}.png`, fullPage: true });
 const fail = (m) => { throw new Error(m); };
 const t0 = Date.now();
+const NOME = `Teste ${String(t0).slice(-6)}`;
+const FONE = `51 9${String(t0).slice(-8, -4)}-${String(t0).slice(-4)}`;
 
 await page.goto(`${BASE}/login`);
 await page.fill("#email", "dona@salao.demo");
@@ -27,14 +29,14 @@ cols > 0 || fail("agenda sem profissionais");
 // novo agendamento para cliente nova
 const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 await page.goto(`${BASE}/agenda/novo?d=${today}`);
-await page.fill("#walkInName", "Teste Playwright");
-await page.fill("#newClientPhone", "51 98888-7777");
+await page.fill("#walkInName", NOME);
+await page.fill("#newClientPhone", FONE);
 await page.selectOption("#serviceId", { index: 1 });
 await page.fill("#time", "18:30");
 await page.check("input[name=force]");
 await page.click("button[type=submit]:has-text('Confirmar agendamento')");
 await page.waitForURL(/\/agenda\?d=/);
-const href = await page.locator("a", { hasText: "Teste Playwright" }).last().getAttribute("href");
+const href = await page.locator("a", { hasText: NOME }).last().getAttribute("href");
 await page.goto(`${BASE}${href}`);
 await shot("03-atendimento");
 // iniciar → finalizar abre comanda
@@ -43,7 +45,7 @@ await page.waitForURL(/\/agenda\/[0-9a-f-]+/);
 await page.click("button:has-text('Finalizar e abrir comanda')");
 await page.waitForURL(/\/comandas\/[0-9a-f-]+/);
 await shot("04-comanda");
-(await page.textContent("body")).includes("Teste Playwright") || fail("comanda sem a cliente");
+(await page.textContent("body")).includes(NOME) || fail("comanda sem a cliente");
 // adicionar produto e receber
 const hasProduct = await page.locator("#refIdP").count();
 if (hasProduct) {
@@ -58,7 +60,7 @@ await shot("05-comanda-paga");
 (await page.textContent("body")).includes("Recebido!") || fail("pagamento não confirmou");
 
 // ficha da cliente
-await page.click("a:has-text('Teste Playwright')");
+await page.click(`a:has-text('${NOME}')`);
 await page.waitForURL(/\/clientes\/[0-9a-f-]+/);
 await shot("06-cliente");
 const body = await page.textContent("body");
@@ -105,9 +107,9 @@ await shot("12-comissoes");
 // agendamento público (nova aba anônima)
 const pub = await browser.newPage({ viewport: { width: 420, height: 860 } });
 await pub.goto(`${BASE}/agendar/studio-bela`);
-await pub.locator("a.card").first().click();
-await pub.locator("a.card").first().click();
-await pub.waitForLoadState("networkidle");
+const clickAndWait = async () => { const prev = pub.url(); await pub.locator("a.card").first().click(); await pub.waitForURL((u) => u.toString() !== prev); };
+await clickAndWait(); // serviço
+await clickAndWait(); // profissional
 // escolhe o primeiro dia útil com horário livre (hoje pode já ter fechado)
 let picked = false;
 for (let i = 1; i <= 6 && !picked; i++) {
@@ -116,7 +118,7 @@ for (let i = 1; i <= 6 && !picked; i++) {
   u.searchParams.set("d", d);
   await pub.goto(u.toString());
   if ((await pub.locator("a.card").count()) > 0) {
-    await pub.locator("a.card").first().click();
+    await clickAndWait();
     picked = true;
   }
 }

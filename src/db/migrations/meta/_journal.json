@@ -22,6 +22,13 @@
       "when": 1792451674480,
       "tag": "0002_sequencias",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792451675480,
+      "tag": "0003_papel_app_rls",
+      "breakpoints": true
     }
   ]
 }

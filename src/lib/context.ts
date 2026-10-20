@@ -27,17 +27,25 @@ export function assertCan(actor: Actor, action: string): void {
  * O callback recebe a transação e um utilitário de auditoria/eventos.
  */
 export async function withTenantTx<T>(actor: Actor, fn: (tx: Tx, ctx: TxContext) => Promise<T>): Promise<T> {
-  return db.transaction(async (tx) => {
-    await tx.execute(sql`select set_config('app.tenant_id', ${actor.tenantId}, true)`);
-    const ctx = new TxContext(tx, actor);
-    return fn(tx, ctx);
-  });
+  return withTenant(actor.tenantId, (tx) => fn(tx, new TxContext(tx, actor)));
 }
 
 /** Leitura simples com contexto de tenant (também em transação, para o RLS valer). */
 export async function withTenantRead<T>(actor: Actor, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  return withTenant(actor.tenantId, fn);
+}
+
+/**
+ * Transação isolada num salão. O usuário de conexão é dono das tabelas (e ignora RLS),
+ * então cada transação troca para o papel `app_rls`, que NÃO ignora RLS, e fixa o salão.
+ * Fora daqui (login, sessão, página pública por slug, rotina diária) o acesso é de sistema
+ * e cada consulta filtra o salão explicitamente.
+ */
+export async function withTenant<T>(tenantId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  if (!/^[0-9a-f-]{36}$/i.test(tenantId)) throw new Error("tenantId inválido");
   return db.transaction(async (tx) => {
-    await tx.execute(sql`select set_config('app.tenant_id', ${actor.tenantId}, true)`);
+    await tx.execute(sql`set local role app_rls`);
+    await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
     return fn(tx);
   });
 }

@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
-import { db } from "@/db/client";
+import { withTenant } from "@/lib/context";
 import { professionals, services } from "@/db/schema";
 import { DomainError } from "@/lib/errors";
 import { systemActor } from "@/lib/system-actor";
@@ -10,8 +10,7 @@ import { availableSlots, createAppointment } from "./use-cases";
 export async function publicCatalog(slug: string) {
   const salon = await getPublicSalon(slug);
   if (!salon || !salon.onlineBooking) return null;
-  return db.transaction(async (tx) => {
-    await tx.execute(sql`select set_config('app.tenant_id', ${salon.tenantId}, true)`);
+  return withTenant(salon.tenantId, async (tx) => {
     const svcs = await tx
       .select({ id: services.id, name: services.name, category: services.category, durationMin: services.durationMin, price: services.price, description: services.description })
       .from(services)

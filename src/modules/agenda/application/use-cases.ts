@@ -3,7 +3,7 @@ import { and, asc, eq, gte, inArray, isNull, lt, lte, ne, or, sql } from "drizzl
 import { z } from "zod";
 import { db } from "@/db/client";
 import { agendaBlocks, appointments, clients, professionals, salonSettings, services, waitlist } from "@/db/schema";
-import { assertCan, can, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
+import { assertCan, can, withTenant, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { DomainError, NotFoundError } from "@/lib/errors";
 import { fromCents, toCents } from "@/lib/money";
 import { normalizePhone } from "@/lib/phone";
@@ -77,8 +77,7 @@ export async function dayAgenda(actor: Actor, dateISO: string) {
 /** Horários livres de um profissional para um serviço num dia (uso interno e público). */
 export async function availableSlots(tenantId: string, dateISO: string, professionalId: string, serviceId: string, opts: { leadMinutes?: number; publicOnly?: boolean } = {}): Promise<string[]> {
   const { start, end } = dayRange(dateISO);
-  return db.transaction(async (tx) => {
-    await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
+  return withTenant(tenantId, async (tx) => {
     const [s] = await tx.select().from(salonSettings).where(eq(salonSettings.tenantId, tenantId)).limit(1);
     const [p] = await tx.select().from(professionals).where(and(eq(professionals.id, professionalId), eq(professionals.isActive, true))).limit(1);
     const [sv] = await tx.select().from(services).where(and(eq(services.id, serviceId), eq(services.isActive, true))).limit(1);
