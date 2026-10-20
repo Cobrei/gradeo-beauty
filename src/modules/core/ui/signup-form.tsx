@@ -88,7 +88,7 @@ export function SignupForm({ segments, action }: Props) {
           {g.services.map((s) => (
             <label key={s.name} className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-sm ${selected.has(s.name) ? "border-brand bg-brand-soft" : "border-line bg-white"}`}>
               <span className="flex items-center gap-2">
-                <input type="checkbox" name="serviceNames" value={s.name} checked={selected.has(s.name)} onChange={() => toggle(s.name)} className="h-4 w-4 accent-[#b8475f]" />
+                <input type="checkbox" name="serviceNames" value={s.name} checked={selected.has(s.name)} onChange={() => toggle(s.name)} className="h-4 w-4 accent-brand" />
                 <span className="font-semibold">{s.name}</span>
               </span>
               <span className="text-xs text-muted">

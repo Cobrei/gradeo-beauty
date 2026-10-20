@@ -82,7 +82,7 @@ export default async function WhatsappPage({ searchParams }: { searchParams: Pro
             ))}
           </div>
           <form action={startQrAction} className="mt-4 space-y-3">
-            <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="terms" required className="mt-0.5 h-4 w-4 accent-[#b8475f]" /> Li e aceito o termo. Entendo que o WhatsApp pode restringir ou bloquear o número e que esse risco é do salão.</label>
+            <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="terms" required className="mt-0.5 h-4 w-4 accent-brand" /> Li e aceito o termo. Entendo que o WhatsApp pode restringir ou bloquear o número e que esse risco é do salão.</label>
             <button className="btn btn-primary">Aceitar e gerar o QR code</button>
           </form>
           <p className="mt-3 text-xs text-muted">Termo completo: <Link href="/termos/whatsapp" className="underline">/termos/whatsapp</Link>. Quer zero risco para o número? Fale com a gente sobre o WhatsApp oficial (Meta).</p>

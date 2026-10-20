@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { brandStyle } from "@/lib/brand-style";
 import { BackBar } from "@/components/ui/back-bar";
 import { redirect } from "next/navigation";
 import { PoweredBy, SalonMark } from "@/components/ui/salon-brand";
@@ -29,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const salon = await getSettings(actor);
   const mobile = [...nav.filter((n) => n.mobile), { href: "/mais", label: "Mais", icon: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" }];
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex min-h-dvh" style={brandStyle(salon.brandColor)}>
       <aside className="hidden w-60 shrink-0 flex-col bg-ink px-3 py-5 text-white md:flex">
         <Link href="/painel" className="mb-5 block rounded-2xl bg-white px-3 py-3 text-ink">
           {salon.logoData ? (

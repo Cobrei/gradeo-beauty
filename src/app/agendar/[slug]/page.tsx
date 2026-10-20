@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { brandStyle } from "@/lib/brand-style";
 import { notFound } from "next/navigation";
 import { PoweredBy, SalonMark } from "@/components/ui/salon-brand";
 import { publicCatalog, publicSlots } from "@/modules/agenda/application/public-booking";
@@ -38,7 +39,7 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
   const step = sp.ok ? 5 : !service ? 1 : !pro ? 2 : !time ? 3 : 4;
 
   return (
-    <main className="min-h-dvh bg-mist" style={salon.brandColor ? ({ "--color-brand": salon.brandColor } as React.CSSProperties) : undefined}>
+    <main className="min-h-dvh bg-mist" style={brandStyle(salon.brandColor)}>
       <div className="mx-auto max-w-lg px-4 py-6">
         <header className="mb-5 flex flex-col items-center text-center">
           <SalonMark name={salon.salonName} logo={salon.logoData} color={salon.brandColor} size={salon.logoData ? 72 : 56} showName={false} />
@@ -125,7 +126,7 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
                 <div><label className="label" htmlFor="name">Seu nome</label><input id="name" name="name" required className="field" /></div>
                 <div><label className="label" htmlFor="phone">Seu WhatsApp</label><input id="phone" name="phone" required inputMode="tel" className="field" placeholder="(51) 99999-9999" /></div>
                 <div><label className="label" htmlFor="notes">Alguma observação?</label><input id="notes" name="notes" className="field" /></div>
-                <label className="flex items-start gap-2 text-sm text-ink-2"><input type="checkbox" name="optIn" className="mt-0.5 h-4 w-4 accent-[#b8475f]" /> Quero receber novidades e promoções do salão pelo WhatsApp (os avisos do meu horário chegam de qualquer jeito).</label>
+                <label className="flex items-start gap-2 text-sm text-ink-2"><input type="checkbox" name="optIn" className="mt-0.5 h-4 w-4 accent-brand" /> Quero receber novidades e promoções do salão pelo WhatsApp (os avisos do meu horário chegam de qualquer jeito).</label>
                 <button className="btn btn-primary w-full">Pedir horário</button>
                 <p className="text-center text-xs text-muted">Você recebe a confirmação pelo WhatsApp {salon.whatsapp ? formatPhone(salon.whatsapp) : ""}.</p>
               </form>

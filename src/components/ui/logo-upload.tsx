@@ -57,6 +57,7 @@ export function LogoUpload({ initial, color }: { initial?: string | null; color?
         <label className="flex items-center gap-2 text-sm">
           Cor do salão <input type="color" name="brandColor" defaultValue={color || "#b8475f"} className="h-8 w-12 cursor-pointer rounded border border-line" />
         </label>
+        <p className="text-xs text-muted">A cor vale para os botões e destaques do sistema e do seu link de agendamento. Toque em Salvar no fim da página para aplicar.</p>
       </div>
       <input type="hidden" name="logoData" value={data} />
     </div>

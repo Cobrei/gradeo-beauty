@@ -137,3 +137,28 @@ export async function retentionCohorts(actor: Actor) {
   );
 }
 
+
+/** "Por onde começar": o que o salão já configurou. Some do Início quando tudo estiver feito. */
+export async function onboardingStatus(actor: Actor) {
+  return withTenantRead(actor, async (tx) => {
+    const [r] = await tx.execute<{ services: number; pros: number; pros_cfg: number; clients: number; appts: number; orders: number; cash: number; logo: boolean }>(sql`
+      select
+        (select count(*)::int from sal_services where deleted_at is null and is_active) as services,
+        (select count(*)::int from sal_professionals where deleted_at is null and is_active) as pros,
+        (select count(*)::int from sal_professionals where deleted_at is null and is_active and (jsonb_array_length(service_ids) > 0 or updated_at > created_at + interval '1 second')) as pros_cfg,
+        (select count(*)::int from crm_clients where deleted_at is null) as clients,
+        (select count(*)::int from agd_appointments where deleted_at is null) as appts,
+        (select count(*)::int from pos_orders where status = 'PAID') as orders,
+        (select count(*)::int from pos_cash_sessions) as cash,
+        (select logo_data is not null or updated_at > created_at + interval '1 second' from sal_settings limit 1) as logo`);
+    const steps = [
+      { key: "config", label: "Ajuste horário, logo e cor do salão", href: "/configuracoes", done: !!r.logo },
+      { key: "servicos", label: "Confira os serviços, preços e tempos", href: "/servicos", done: r.services > 0 },
+      { key: "equipe", label: "Cadastre a equipe e o que cada um faz", href: "/equipe", done: r.pros > 1 || r.pros_cfg > 0 },
+      { key: "clientes", label: "Importe ou cadastre suas clientes", href: "/clientes/importar", done: r.clients > 0 },
+      { key: "agenda", label: "Faça o primeiro agendamento", href: "/agenda/novo", done: r.appts > 0 },
+      { key: "caixa", label: "Abra o caixa e feche a primeira comanda", href: "/caixa", done: r.cash > 0 && r.orders > 0 },
+    ];
+    return { steps, done: steps.filter((s) => s.done).length };
+  });
+}

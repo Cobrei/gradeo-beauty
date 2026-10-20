@@ -113,7 +113,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                     <MoneyInput name="unitPrice" placeholder="preço da tabela" />
                   </Field>
                   {o.credits.length > 0 && (
-                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="useCredit" className="h-4 w-4 accent-[#b8475f]" /> Usar crédito de pacote</label>
+                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="useCredit" className="h-4 w-4 accent-brand" /> Usar crédito de pacote</label>
                   )}
                 </Form>
               </Card>

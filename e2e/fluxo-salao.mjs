@@ -29,9 +29,13 @@ cols > 0 || fail("agenda sem profissionais");
 // novo agendamento para cliente nova
 const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 await page.goto(`${BASE}/agenda/novo?d=${today}`);
+// passo a passo: serviço → profissional → (horário) → confirmar
+await page.locator("a[href*='&s='], a[href*='?s='], a[href*='s=']").filter({ hasText: "min" }).first().click();
+await page.waitForURL(/s=/);
+const proLink = page.locator("a.chip[href*='pro=']").first();
+if (await proLink.count()) { await proLink.click(); await page.waitForURL(/pro=/); }
 await page.fill("#walkInName", NOME);
 await page.fill("#newClientPhone", FONE);
-await page.selectOption("#serviceId", { index: 1 });
 await page.fill("#time", "18:30");
 await page.check("input[name=force]");
 await page.click("button[type=submit]:has-text('Confirmar agendamento')");

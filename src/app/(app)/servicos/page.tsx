@@ -60,8 +60,8 @@ export default async function ServicosPage({ searchParams }: { searchParams: Pro
                 <Field label="Ciclo de retorno (dias)" name="returnIntervalDays" hint="Usado para lembrar a cliente de voltar."><input id="returnIntervalDays" name="returnIntervalDays" type="number" min={1} className="field" defaultValue={editing?.returnIntervalDays ?? ""} /></Field>
               </div>
               <Field label="Descrição (aparece no agendamento online)" name="description"><textarea id="description" name="description" rows={2} className="field" defaultValue={editing?.description ?? ""} /></Field>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="onlineBooking" defaultChecked={editing?.onlineBooking ?? true} className="h-4 w-4 accent-[#b8475f]" /> Disponível no agendamento online</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" defaultChecked={editing?.isActive ?? true} className="h-4 w-4 accent-[#b8475f]" /> Ativo</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="onlineBooking" defaultChecked={editing?.onlineBooking ?? true} className="h-4 w-4 accent-brand" /> Disponível no agendamento online</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" defaultChecked={editing?.isActive ?? true} className="h-4 w-4 accent-brand" /> Ativo</label>
             </Form>
           </Card>
         )}

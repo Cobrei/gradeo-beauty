@@ -48,7 +48,7 @@ export function ClientForm({ client, professionals, returnTo }: { client?: Clien
         </Field>
       </div>
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="marketingOptIn" defaultChecked={client ? !client.marketingOptOut : true} className="h-4 w-4 accent-[#b8475f]" />
+        <input type="checkbox" name="marketingOptIn" defaultChecked={client ? !client.marketingOptOut : true} className="h-4 w-4 accent-brand" />
         Aceita receber mensagens e promoções do salão (LGPD)
       </label>
     </Form>

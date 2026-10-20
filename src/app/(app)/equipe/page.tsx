@@ -56,26 +56,26 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
                 <Field label="Comissão serviços %" name="commissionPct"><input id="commissionPct" name="commissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing ? Number(editing.commissionPct) : 40} /></Field>
                 <Field label="Comissão produtos %" name="productCommissionPct"><input id="productCommissionPct" name="productCommissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing ? Number(editing.productCommissionPct) : 10} /></Field>
               </div>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="acceptsOnline" defaultChecked={editing?.acceptsOnline ?? true} className="h-4 w-4 accent-[#b8475f]" /> Aparece no agendamento online</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" defaultChecked={editing?.isActive ?? true} className="h-4 w-4 accent-[#b8475f]" /> Ativa</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="acceptsOnline" defaultChecked={editing?.acceptsOnline ?? true} className="h-4 w-4 accent-brand" /> Aparece no agendamento online</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" defaultChecked={editing?.isActive ?? true} className="h-4 w-4 accent-brand" /> Ativa</label>
               <details>
                 <summary className="cursor-pointer text-sm font-semibold text-brand">Serviços que faz (vazio = todos)</summary>
                 <div className="mt-2 grid grid-cols-2 gap-1">
                   {services.map((s) => (
-                    <label key={s.id} className="flex items-center gap-2 text-sm"><input type="checkbox" name="serviceIds" value={s.id} defaultChecked={editing?.serviceIds.includes(s.id) ?? false} className="h-4 w-4 accent-[#b8475f]" /> {s.name}</label>
+                    <label key={s.id} className="flex items-center gap-2 text-sm"><input type="checkbox" name="serviceIds" value={s.id} defaultChecked={editing?.serviceIds.includes(s.id) ?? false} className="h-4 w-4 accent-brand" /> {s.name}</label>
                   ))}
                 </div>
               </details>
               <details open={custom}>
                 <summary className="cursor-pointer text-sm font-semibold text-brand">Horário próprio (diferente do salão)</summary>
-                <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" name="customHours" defaultChecked={custom} className="h-4 w-4 accent-[#b8475f]" /> Usar horário próprio</label>
+                <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" name="customHours" defaultChecked={custom} className="h-4 w-4 accent-brand" /> Usar horário próprio</label>
                 <CopyHoursButton className="mt-2" />
                 <div className="mt-2 space-y-1">
                   {WEEKDAYS.map((d, i) => {
                     const h = editing?.workingHours[String(i)];
                     return (
                       <div key={d} className="grid grid-cols-5 items-center gap-1 text-sm">
-                        <label className="col-span-2 flex items-center gap-1"><input type="checkbox" name={`wd_${i}`} defaultChecked={custom ? !!h : i !== 0} className="h-4 w-4 accent-[#b8475f]" /> {d.slice(0, 3)}</label>
+                        <label className="col-span-2 flex items-center gap-1"><input type="checkbox" name={`wd_${i}`} defaultChecked={custom ? !!h : i !== 0} className="h-4 w-4 accent-brand" /> {d.slice(0, 3)}</label>
                         <input type="time" name={`open_${i}`} defaultValue={h?.open ?? "09:00"} className="field col-span-1 min-h-9 px-1 py-1 text-xs" />
                         <span className="text-center text-xs text-muted">às</span>
                         <input type="time" name={`close_${i}`} defaultValue={h?.close ?? "19:00"} className="field col-span-1 min-h-9 px-1 py-1 text-xs" />

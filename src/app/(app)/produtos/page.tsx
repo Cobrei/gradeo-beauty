@@ -62,8 +62,8 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Pro
                 <Field label="Unidade" name="unit"><input id="unit" name="unit" className="field" defaultValue={editing?.unit ?? "un"} /></Field>
                 <Field label="Estoque mínimo" name="minStock"><input id="minStock" name="minStock" inputMode="decimal" className="field" defaultValue={editing ? Number(editing.minStock) : 0} /></Field>
               </div>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="forSale" defaultChecked={editing?.forSale ?? true} className="h-4 w-4 accent-[#b8475f]" /> É para revenda (aparece na comanda)</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" defaultChecked={editing?.isActive ?? true} className="h-4 w-4 accent-[#b8475f]" /> Ativo</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="forSale" defaultChecked={editing?.forSale ?? true} className="h-4 w-4 accent-brand" /> É para revenda (aparece na comanda)</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" defaultChecked={editing?.isActive ?? true} className="h-4 w-4 accent-brand" /> Ativo</label>
               {!editing && <p className="text-xs text-muted">Depois de salvar, lance a entrada de estoque na página do produto.</p>}
             </Form>
           </Card>

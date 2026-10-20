@@ -47,7 +47,7 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
               const h = s.openingHours[String(i)];
               return (
                 <div key={d} className="grid grid-cols-6 items-center gap-2 text-sm">
-                  <label className="col-span-2 flex items-center gap-2"><input type="checkbox" name={`wd_${i}`} defaultChecked={!!h} className="h-4 w-4 accent-[#b8475f]" /> {d}</label>
+                  <label className="col-span-2 flex items-center gap-2"><input type="checkbox" name={`wd_${i}`} defaultChecked={!!h} className="h-4 w-4 accent-brand" /> {d}</label>
                   <input type="time" name={`open_${i}`} defaultValue={h?.open ?? "09:00"} className="field col-span-2 min-h-9 py-1" />
                   <input type="time" name={`close_${i}`} defaultValue={h?.close ?? "19:00"} className="field col-span-2 min-h-9 py-1" />
                 </div>
@@ -56,7 +56,7 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
           </div>
         </Card>
         <Card title="Agendamento online" className="mb-4">
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="onlineBooking" defaultChecked={s.onlineBooking} className="h-4 w-4 accent-[#b8475f]" /> Clientes podem agendar pelo link</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="onlineBooking" defaultChecked={s.onlineBooking} className="h-4 w-4 accent-brand" /> Clientes podem agendar pelo link</label>
           <div className="mt-3 grid grid-cols-2 gap-3">
             <Field label="Grade de horários (min)" name="slotMinutes"><input id="slotMinutes" name="slotMinutes" type="number" min={5} max={60} step={5} className="field" defaultValue={s.slotMinutes} /></Field>
             <Field label="Antecedência mínima (min)" name="onlineBookingLeadMin"><input id="onlineBookingLeadMin" name="onlineBookingLeadMin" type="number" min={0} className="field" defaultValue={s.onlineBookingLeadMin} /></Field>
@@ -65,7 +65,7 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
         </Card>
         <Card title="Recursos opcionais" className="mb-4">
           <div className="space-y-3 text-sm">
-            <label className="flex items-start gap-2"><input type="checkbox" name="partnerMode" defaultChecked={s.partnerMode} className="mt-0.5 h-4 w-4 accent-[#b8475f]" /><span><b>Trabalho com profissionais parceiros (Lei do Salão-Parceiro)</b><br /><span className="text-muted">Mostra o CNPJ de cada profissional na Equipe e o relatório de cota-parte em Comissões, para o contador. <Link href="/lei-salao-parceiro" target="_blank" className="font-semibold text-brand underline">O que é a lei?</Link></span></span></label>
+            <label className="flex items-start gap-2"><input type="checkbox" name="partnerMode" defaultChecked={s.partnerMode} className="mt-0.5 h-4 w-4 accent-brand" /><span><b>Trabalho com profissionais parceiros (Lei do Salão-Parceiro)</b><br /><span className="text-muted">Mostra o CNPJ de cada profissional na Equipe e o relatório de cota-parte em Comissões, para o contador. <Link href="/lei-salao-parceiro" target="_blank" className="font-semibold text-brand underline">O que é a lei?</Link></span></span></label>
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
               <span><b>Pesquisa de satisfação</b> e <b>Fidelidade</b><br /><span className="text-muted">Ligue ou desligue em Automações.</span></span>
               <Link href="/configuracoes/automacoes" className="btn btn-secondary btn-sm">Abrir Automações</Link>

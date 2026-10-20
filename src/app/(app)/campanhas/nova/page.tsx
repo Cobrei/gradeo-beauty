@@ -30,7 +30,7 @@ export default async function NovaCampanha({ searchParams }: { searchParams: Pro
                 const s = segments.find((x) => x.key === p.key);
                 return (
                   <label key={p.key} className="flex cursor-pointer items-center gap-2 rounded-xl border border-line px-3 py-2 text-sm has-[:checked]:border-brand has-[:checked]:bg-brand-soft">
-                    <input type="radio" name="preset" value={p.key} defaultChecked={preset === p.key} className="accent-[#b8475f]" />
+                    <input type="radio" name="preset" value={p.key} defaultChecked={preset === p.key} className="accent-brand" />
                     <span className="flex-1"><b>{p.label}</b> <span className="text-muted">· {p.hint}</span></span>
                     <span className="rounded-full bg-mist px-2 text-xs font-bold">{s?.count ?? 0}</span>
                   </label>

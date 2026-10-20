@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { brandStyle } from "@/lib/brand-style";
 import { formatPhone } from "@/lib/phone";
 import { PoweredBy, SalonMark } from "./salon-brand";
 
@@ -8,7 +9,7 @@ type Salon = { salonName: string; logoData: string | null; brandColor: string | 
 export function PublicShell({ salon, children }: { salon: Salon; children: ReactNode }) {
   const address = (salon.addressJson as { text?: string } | null)?.text;
   return (
-    <main className="min-h-dvh bg-mist" style={salon.brandColor ? ({ "--color-brand": salon.brandColor } as React.CSSProperties) : undefined}>
+    <main className="min-h-dvh bg-mist" style={brandStyle(salon.brandColor)}>
       <div className="mx-auto max-w-lg px-4 py-6">
         <header className="mb-5 flex flex-col items-center text-center">
           <SalonMark name={salon.salonName} logo={salon.logoData} color={salon.brandColor} size={salon.logoData ? 72 : 56} showName={false} />

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Badge, Card, LinkButton, Notice, Stat, WaLink } from "@/components/ui";
 import { requireActor } from "@/modules/core/application/auth";
 import { getSettings } from "@/modules/core/application/settings";
-import { dashboard } from "@/modules/reports/application/queries";
+import { dashboard, onboardingStatus } from "@/modules/reports/application/queries";
 import { dayAgenda } from "@/modules/agenda/application/use-cases";
 import { segmentSummary, upcomingBirthdays } from "@/modules/crm/application/use-cases";
 import { can } from "@/lib/context";
@@ -21,7 +21,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
   const actor = await requireActor();
   const sp = await searchParams;
   const today = todayISO();
-  const [d, settings] = await Promise.all([dashboard(actor), getSettings(actor)]);
+  const [d, settings, ob] = await Promise.all([dashboard(actor), getSettings(actor), can(actor, "core.settings.manage") ? onboardingStatus(actor) : null]);
   const canAgenda = can(actor, "agenda.appointment.read") || can(actor, "agenda.appointment.read_own");
   const canCrm = can(actor, "crm.client.read");
   const [agenda, segments, bdays, lowFeedback] = await Promise.all([canAgenda ? dayAgenda(actor, today) : null, canCrm ? segmentSummary(actor) : [], canCrm ? upcomingBirthdays(actor, 7) : [], canCrm ? pendingLowFeedback(actor) : []]);
@@ -48,6 +48,29 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
           {can(actor, "pos.order.write") && <LinkButton href="/comandas/nova" variant="secondary">+ Comanda</LinkButton>}
         </div>
       </div>
+
+      {ob && ob.done < ob.steps.length && (
+        <Card className="border border-brand/25">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wider text-brand">Por onde começar</div>
+              <p className="text-lg font-bold">Deixe o salão pronto em 6 passos</p>
+            </div>
+            <span className="text-sm font-semibold text-muted">{ob.done} de {ob.steps.length} feitos</span>
+          </div>
+          <div className="mt-2 h-2 rounded-full bg-mist"><div className="h-2 rounded-full bg-brand" style={{ width: `${(ob.done / ob.steps.length) * 100}%` }} /></div>
+          <ol className="mt-4 grid gap-2 sm:grid-cols-2">
+            {ob.steps.map((st, i) => (
+              <li key={st.key}>
+                <Link href={st.href} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm ${st.done ? "border-line bg-mist/60 text-muted line-through" : "border-line bg-white font-semibold hover:border-brand"}`}>
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ${st.done ? "bg-ok text-white" : "bg-brand-soft text-brand"}`}>{st.done ? "✓" : i + 1}</span>
+                  {st.label}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </Card>
+      )}
 
       <ModuleGrid actor={actor} />
 

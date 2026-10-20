@@ -29,7 +29,7 @@ export default async function AutomacoesPage({ searchParams }: { searchParams: P
                 <input type="hidden" name="kind" value={a.kind} />
                 {a.kind === "SURVEY" && <p className="rounded-lg bg-mist p-3 text-xs text-ink-2">Opcional. A cliente recebe um link e dá uma nota de 1 a 5. Quem dá 4 ou 5 é convidada a avaliar o salão no Google{settings.reviewUrl ? "" : " (cadastre o link de avaliação do Google em Configurações)"}; notas de 1 a 3 aparecem no Início para você resolver. Quando ligada, substitui o agradecimento simples (a cliente recebe uma mensagem só).</p>}
                 {a.kind === "LOYALTY" && <p className="rounded-lg bg-mist p-3 text-xs text-ink-2">Opcional. A cada X visitas pagas, a cliente ganha um voucher pessoal de uso único. O progresso aparece na ficha dela.</p>}
-                <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={a.enabled} className="h-4 w-4 accent-[#b8475f]" /> Ativa</label>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={a.enabled} className="h-4 w-4 accent-brand" /> Ativa</label>
                 <Field label="Mensagem" name="template" hint="Variáveis: {nome} {salao} {hora} {data} {servico} {profissional} {voucher} {validade} {link} {confirmar} (link para confirmar o horário) {avaliar} (link da pesquisa) {visitas}">
                   <textarea id={`t_${a.kind}`} name="template" rows={3} className="field" defaultValue={a.template} />
                 </Field>
