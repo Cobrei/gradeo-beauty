@@ -5,7 +5,7 @@ const p = await b.newPage({ viewport: { width: 1280, height: 860 } });
 const t0 = Date.now();
 await p.goto(`${BASE}/login`, { timeout: 60000 });
 await p.fill("#email", "dona@salao.demo"); await p.fill("#password", "gradeo123");
-await p.click("button[type=submit]"); await p.waitForURL(`${BASE}/`, { timeout: 60000 });
+await p.click("button[type=submit]"); await p.waitForURL(`${BASE}/painel`, { timeout: 60000 });
 const check = async (path, text, shot) => { const r = await p.goto(`${BASE}${path}`, { timeout: 60000 }); const body = await p.textContent("body"); const ok = r.status() === 200 && body.includes(text); console.log(`${ok ? "OK " : "FALHOU"} ${path} (${r.status()})`); await p.screenshot({ path: `e2e/prod/${shot}.png`, fullPage: false }); if (!ok) process.exitCode = 1; };
 await check("/", "Clientes sumidas", "01-painel");
 await check("/agenda", "Agenda", "02-agenda");
