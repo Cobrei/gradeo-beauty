@@ -48,7 +48,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
       {sp.pago && (
         <div className="mb-4">
           <Notice tone="ok">
-            Recebido! {o.clientPhone && <WaLink phone={o.clientPhone} text={receipt} className="ml-2 underline">Enviar recibo pelo WhatsApp</WaLink>}
+            Recebido! {o.clientPhone ? "Agora é só mandar o recibo para a cliente." : "Comanda paga."} {o.clientPhone && <WaLink phone={o.clientPhone} text={receipt} className="btn btn-wa btn-sm ml-2">Enviar recibo pelo WhatsApp</WaLink>}
           </Notice>
         </div>
       )}
@@ -177,7 +177,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                   <li key={p.id} className="flex justify-between py-1"><span>{PAYMENT_METHODS[p.method]}{p.installments > 1 ? ` ${p.installments}×` : ""}</span><span className="font-semibold">{formatBRL(toCents(p.amount))}</span></li>
                 ))}
               </ul>
-              {o.clientPhone && <WaLink phone={o.clientPhone} text={receipt} className="btn btn-wa btn-sm mt-3">Enviar recibo</WaLink>}
+              {o.clientPhone && !sp.pago && <WaLink phone={o.clientPhone} text={receipt} className="btn btn-wa btn-sm mt-3">Enviar recibo pelo WhatsApp</WaLink>}
             </Card>
           )}
         </div>
