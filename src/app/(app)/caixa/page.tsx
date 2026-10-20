@@ -1,3 +1,4 @@
+import { MoneyInput } from "@/components/ui/money-input";
 import { Badge, Card, Field, Notice, PageHeader, Stat } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
@@ -25,8 +26,8 @@ export default async function CaixaPage({ searchParams }: { searchParams: Promis
         <Card title="Abrir caixa" className="max-w-md">
           {manage ? (
             <Form action={openCashAction} submitLabel="Abrir caixa">
-              <Field label="Fundo de troco (R$)" name="openingAmount">
-                <input id="openingAmount" name="openingAmount" inputMode="decimal" className="field" defaultValue="0,00" />
+              <Field label="Fundo de troco" name="openingAmount">
+                <MoneyInput name="openingAmount" defaultValue={0} />
               </Field>
             </Form>
           ) : (
@@ -67,7 +68,7 @@ export default async function CaixaPage({ searchParams }: { searchParams: Promis
                         <Field label="Tipo" name="kind">
                           <select id="kind" name="kind" className="field"><option value="OUT">Saída (sangria/despesa)</option><option value="IN">Entrada (suprimento)</option></select>
                         </Field>
-                        <Field label="Valor" name="amount"><input id="amount" name="amount" inputMode="decimal" className="field" required /></Field>
+                        <Field label="Valor" name="amount"><MoneyInput name="amount" required /></Field>
                         <Field label="Descrição" name="description"><input id="description" name="description" className="field" required placeholder="Ex.: água, motoboy" /></Field>
                       </div>
                     </Form>
@@ -79,8 +80,8 @@ export default async function CaixaPage({ searchParams }: { searchParams: Promis
               <Card title="Fechar caixa">
                 <Form action={closeCashAction} submitLabel="Fechar caixa">
                   <input type="hidden" name="sessionId" value={session.id} />
-                  <Field label="Dinheiro contado na gaveta (R$)" name="closingAmount" hint={`Esperado: ${formatBRL(summary.expectedCash)}`}>
-                    <input id="closingAmount" name="closingAmount" inputMode="decimal" className="field" required />
+                  <Field label="Dinheiro contado na gaveta" name="closingAmount" hint={`Esperado: ${formatBRL(summary.expectedCash)}`}>
+                    <MoneyInput name="closingAmount" required />
                   </Field>
                   <Field label="Observações" name="notes"><input id="notes" name="notes" className="field" /></Field>
                 </Form>

@@ -1,3 +1,5 @@
+import { MoneyInput } from "@/components/ui/money-input";
+import { assertCan } from "@/lib/context";
 import { Card, EmptyState, Field, LinkButton, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
@@ -9,6 +11,7 @@ export const metadata = { title: "Pacotes" };
 
 export default async function PacotesPage({ searchParams }: { searchParams: Promise<{ novo?: string; editar?: string }> }) {
   const actor = await requireActor();
+  assertCan(actor, "catalog.service.manage");
   const sp = await searchParams;
   const [packs, services] = await Promise.all([listPackages(actor), listServices(actor)]);
   const editing = sp.editar ? packs.find((p) => p.id === sp.editar) : undefined;
@@ -38,7 +41,7 @@ export default async function PacotesPage({ searchParams }: { searchParams: Prom
               {editing && <input type="hidden" name="id" value={editing.id} />}
               <Field label="Nome" name="name"><input id="name" name="name" className="field" required defaultValue={editing?.name ?? ""} /></Field>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Preço (R$)" name="price"><input id="price" name="price" inputMode="decimal" className="field" required defaultValue={editing ? fromCents(toCents(editing.price)) : ""} /></Field>
+                <Field label="Preço" name="price"><MoneyInput name="price" required defaultValue={editing ? editing.price : null} /></Field>
                 <Field label="Validade (dias)" name="validityDays"><input id="validityDays" name="validityDays" type="number" className="field" defaultValue={editing?.validityDays ?? 90} /></Field>
               </div>
               <div>

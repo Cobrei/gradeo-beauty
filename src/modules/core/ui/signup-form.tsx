@@ -1,4 +1,5 @@
 "use client";
+import { formatBRL } from "@/lib/money";
 import { useActionState, useState } from "react";
 import type { ActionResult } from "@/lib/errors";
 import type { ServicePreset } from "@/modules/catalog/domain/presets";
@@ -76,7 +77,7 @@ export function SignupForm({ segments, action }: Props) {
                 <span className="font-semibold">{s.name}</span>
               </span>
               <span className="text-xs text-muted">
-                {s.durationMin} min · R$ {s.price}
+                {s.durationMin} min · {formatBRL(Math.round(s.price * 100))}
               </span>
             </label>
           ))}

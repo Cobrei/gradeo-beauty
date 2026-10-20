@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Logo, MirrorO } from "@/components/ui/logo";
 import { MODULES } from "@/components/ui/modules";
 import { BRAND } from "@/config/brand";
-import { PLANS, PROMO_NOTE, TRIAL_DAYS, brl } from "@/config/plans";
+import { FEATURES, PLANS, PROMO_NOTE, TRIAL_DAYS, brl, type Cell } from "@/config/plans";
 import { getActor } from "@/modules/core/application/auth";
 
 export const metadata = {
@@ -23,7 +23,7 @@ const STEPS = [
 
 const FAQ = [
   { q: "Preciso instalar alguma coisa?", a: "Não. O gradeo beauty abre no navegador do celular, tablet ou computador. No celular dá para adicionar à tela inicial e usar como um app." },
-  { q: "Como funcionam as mensagens de WhatsApp?", a: "No modo manual, que já vem ligado e não tem custo, um toque abre o WhatsApp com a mensagem pronta e o sistema marca como enviada. No plano Salão dá para ligar o envio automático pela API oficial do WhatsApp." },
+  { q: "Como funcionam as mensagens de WhatsApp?", a: "No modo manual, que já vem ligado e não tem custo, um toque abre o WhatsApp com a mensagem pronta e o sistema marca como enviada. Nos planos Pro e Mega, o envio automático pelo WhatsApp oficial do próprio salão está chegando." },
   { q: "Consigo trazer minhas clientes de outro sistema?", a: "Sim. Importe uma planilha, a lista de contatos do celular ou cole o texto. O gradeo junta duplicadas pelo telefone." },
   { q: "Cada pessoa da equipe tem o próprio acesso?", a: "Sim. Há perfis de dona, gerente, recepção, profissional e financeiro, cada um com o que precisa para trabalhar." },
   { q: "Tem fidelidade ou multa?", a: "Não. Você paga mês a mês e cancela quando quiser." },
@@ -194,7 +194,7 @@ export default async function Home() {
               <h2 className="text-2xl font-extrabold tracking-tight [text-wrap:balance]">WhatsApp funcionando no primeiro dia</h2>
             </div>
             <p className="text-ink-2">Lembrete de horário, agradecimento, convite de retorno no ciclo do serviço e parabéns com voucher. As mensagens ficam prontas numa fila; um toque abre o WhatsApp e já marca como enviada.</p>
-            <p className="text-ink-2">Sem custo por mensagem no modo manual e sem pagar comissão sobre a sua própria base. Quando quiser escala, ligue o envio automático pela API oficial.</p>
+            <p className="text-ink-2">Sem custo por mensagem no modo manual e sem pagar comissão sobre a sua própria base. Em breve, o envio automático pelo WhatsApp oficial do próprio salão: as mensagens saem do seu número.</p>
           </div>
         </section>
 
@@ -202,7 +202,7 @@ export default async function Home() {
         <section id="planos" className="scroll-mt-20">
           <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
             <p className="text-center text-xs font-bold uppercase tracking-wider text-brand">Planos</p>
-            <h2 className="mx-auto mt-2 max-w-2xl text-center text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">WhatsApp e campanhas inclusos em todos os planos</h2>
+            <h2 className="mx-auto mt-2 max-w-2xl text-center text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Comece pequeno, cresça quando quiser</h2>
             <p className="mx-auto mt-3 max-w-xl text-center text-ink-2">{PROMO_NOTE}</p>
             <div className="mt-10 grid gap-4 md:grid-cols-3">
               {PLANS.map((p) => (
@@ -210,24 +210,44 @@ export default async function Home() {
                   {p.highlight && <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-0.5 text-xs font-bold text-white">Mais escolhido</span>}
                   <h3 className="text-xl font-extrabold">{p.name}</h3>
                   <p className="text-sm text-muted">{p.who}</p>
-                  <div className="mt-5">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-sm font-bold text-muted">R$</span>
-                      <span className="text-4xl font-extrabold tabular-nums">{brl(p.price)}</span>
-                      <span className="text-muted">/mês</span>
-                    </div>
-                    <div className="mt-1 text-sm text-muted">ou R$ {brl(p.annual)}/mês no plano anual</div>
+                  <div className="mt-5 flex items-baseline gap-1">
+                    <span className="text-4xl font-extrabold tabular-nums">R$ {brl(p.price)}</span>
+                    <span className="text-muted">/mês</span>
                   </div>
                   <ul className="mt-5 flex-1 space-y-2 text-sm text-ink-2">
                     {p.items.map((i) => (
                       <li key={i} className="flex gap-2"><span className="text-ok">✓</span>{i}</li>
                     ))}
                   </ul>
-                  <Link href={`/cadastro?plano=${p.id}`} className={`btn mt-6 ${p.highlight ? "btn-primary" : "btn-secondary"}`}>Começar grátis</Link>
+                  <Link href={`/cadastro?plano=${p.id}`} className={`btn mt-6 ${p.highlight ? "btn-primary" : "btn-secondary"}`}>Testar {TRIAL_DAYS} dias grátis</Link>
                 </div>
               ))}
             </div>
-            <p className="mt-6 text-center text-sm text-muted">{TRIAL_DAYS} dias grátis em qualquer plano, sem cartão. Mais de 15 profissionais ou várias unidades: <a href={WA} target="_blank" rel="noopener" className="font-semibold text-brand underline">fale com a gente</a>.</p>
+
+            <h3 className="mt-16 text-center text-2xl font-extrabold tracking-tight">Compare o que vem em cada plano</h3>
+            <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-white">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead>
+                  <tr className="border-b border-line bg-mist text-left">
+                    <th className="px-4 py-3 font-bold">Recurso</th>
+                    {PLANS.map((p) => (
+                      <th key={p.id} className={`w-32 px-3 py-3 text-center font-extrabold ${p.highlight ? "text-brand" : ""}`}>
+                        {p.name}
+                        <div className="text-xs font-semibold text-muted">R$ {brl(p.price)}</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {FEATURES.map((f) => (
+                    <FeatureLine key={f.label} group={f.group} label={f.label} cells={[f.basic, f.pro, f.mega]} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-4 text-center text-sm text-muted">
+              “Em breve” são recursos em desenvolvimento, sem custo extra quando chegarem. Mais de 12 profissionais ou várias unidades: <a href={WA} target="_blank" rel="noopener" className="font-semibold text-brand underline">fale com a gente</a>.
+            </p>
           </div>
         </section>
 
@@ -271,5 +291,25 @@ export default async function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function FeatureLine({ group, label, cells }: { group?: string; label: string; cells: Cell[] }) {
+  return (
+    <>
+      {group && (
+        <tr className="bg-[#fcfafb]">
+          <td colSpan={4} className="px-4 pb-1 pt-4 text-xs font-bold uppercase tracking-wider text-brand">{group}</td>
+        </tr>
+      )}
+      <tr className="border-t border-line/70">
+        <td className="px-4 py-2.5 text-ink-2">{label}</td>
+        {cells.map((c, i) => (
+          <td key={i} className="px-3 py-2.5 text-center">
+            {c === true ? <span className="font-bold text-ok" aria-label="incluso">✓</span> : c === false ? <span className="text-line" aria-label="não incluso">—</span> : c === "em breve" ? <span className="rounded-full bg-gold-soft px-2 py-0.5 text-xs font-bold text-[#8a6420]">em breve</span> : <span className="font-semibold">{c}</span>}
+          </td>
+        ))}
+      </tr>
+    </>
   );
 }

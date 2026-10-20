@@ -1,3 +1,4 @@
+import { MoneyInput } from "@/components/ui/money-input";
 import Link from "next/link";
 import { Badge, Card, Field, Notice, PageHeader, WaLink } from "@/components/ui";
 import { Form } from "@/components/ui/form";
@@ -24,7 +25,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
   const total = toCents(ord.total);
   const name = o.clientName ?? ord.walkInName ?? "Cliente";
   const creditServices = new Set(o.credits.map((c) => c.serviceId));
-  const receipt = `*${settings.salonName}* · Comanda #${ord.number} · ${formatBR(ord.serviceDate)}\n${o.items.map((i) => `• ${i.item.description} ${Number(i.item.qty) > 1 ? `×${Number(i.item.qty)} ` : ""}R$ ${fromCents(toCents(i.item.total))}`).join("\n")}\n${toCents(ord.discount) + toCents(ord.voucherDiscount) > 0 ? `Descontos: R$ ${fromCents(toCents(ord.discount) + toCents(ord.voucherDiscount))}\n` : ""}*Total: R$ ${fromCents(total)}*\nObrigada pela visita! 💕`;
+  const receipt = `*${settings.salonName}* · Comanda #${ord.number} · ${formatBR(ord.serviceDate)}\n${o.items.map((i) => `• ${i.item.description} ${Number(i.item.qty) > 1 ? `×${Number(i.item.qty)} ` : ""}${formatBRL(toCents(i.item.total))}`).join("\n")}\n${toCents(ord.discount) + toCents(ord.voucherDiscount) > 0 ? `Descontos: ${formatBRL(toCents(ord.discount) + toCents(ord.voucherDiscount))}\n` : ""}*Total: ${formatBRL(total)}*\nObrigada pela visita! 💕`;
 
   return (
     <div>
@@ -96,7 +97,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                   <Field label="Serviço" name="refId">
                     <select id="refId" name="refId" className="field" required>
                       {services.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name} · R$ {fromCents(toCents(s.price))}{creditServices.has(s.id) ? " · tem crédito" : ""}</option>
+                        <option key={s.id} value={s.id}>{s.name} · {formatBRL(toCents(s.price))}{creditServices.has(s.id) ? " · tem crédito" : ""}</option>
                       ))}
                     </select>
                   </Field>
@@ -108,7 +109,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                     </select>
                   </Field>
                   <Field label="Preço (vazio = tabela)" name="unitPrice">
-                    <input id="unitPrice" name="unitPrice" inputMode="decimal" className="field" />
+                    <MoneyInput name="unitPrice" placeholder="preço da tabela" />
                   </Field>
                   {o.credits.length > 0 && (
                     <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="useCredit" className="h-4 w-4 accent-[#b8475f]" /> Usar crédito de pacote</label>
@@ -124,7 +125,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                       <Field label="Produto" name="refIdP">
                         <select id="refIdP" name="refId" className="field" required>
                           {products.filter((p) => p.forSale).map((p) => (
-                            <option key={p.id} value={p.id}>{p.name} · R$ {fromCents(toCents(p.salePrice))} · est. {Number(p.stockQty)}</option>
+                            <option key={p.id} value={p.id}>{p.name} · {formatBRL(toCents(p.salePrice))} · est. {Number(p.stockQty)}</option>
                           ))}
                         </select>
                       </Field>
@@ -150,7 +151,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                       <Field label="Pacote" name="refIdK">
                         <select id="refIdK" name="refId" className="field" required>
                           {packages.map((p) => (
-                            <option key={p.id} value={p.id}>{p.name} · R$ {fromCents(toCents(p.price))}</option>
+                            <option key={p.id} value={p.id}>{p.name} · {formatBRL(toCents(p.price))}</option>
                           ))}
                         </select>
                       </Field>
@@ -191,7 +192,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                   {Object.entries(PAYMENT_METHODS).map(([k, label], i) => (
                     <div key={k} className="grid grid-cols-5 items-end gap-2">
                       <Field label={label} name={`pay_${k}`} className="col-span-3">
-                        <input id={`pay_${k}`} name={`pay_${k}`} inputMode="decimal" className="field" placeholder="0,00" defaultValue={i === 0 ? fromCents(total) : ""} />
+                        <MoneyInput id={`pay_${k}`} name={`pay_${k}`} defaultValue={i === 0 ? total / 100 : null} />
                       </Field>
                       {k === "CREDIT" ? (
                         <Field label="Parcelas" name={`inst_${k}`} className="col-span-2">
@@ -228,7 +229,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                   <Form action={discountAction} submitLabel="Aplicar">
                     <input type="hidden" name="orderId" value={ord.id} />
                     <div className="grid grid-cols-2 gap-2">
-                      <Field label="Valor (R$)" name="amount"><input id="amount" name="amount" inputMode="decimal" className="field" defaultValue={fromCents(toCents(ord.discount))} /></Field>
+                      <Field label="Valor" name="amount"><MoneyInput name="amount" defaultValue={ord.discount} /></Field>
                       <Field label="Motivo" name="reason"><input id="reason" name="reason" className="field" defaultValue={ord.discountReason ?? ""} /></Field>
                     </div>
                   </Form>

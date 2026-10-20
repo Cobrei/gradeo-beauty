@@ -17,7 +17,7 @@ export function Form({ action, children, submitLabel = "Salvar", className = "" 
     <ErrorsCtx.Provider value={errors}>
       <form action={formAction} className={`space-y-4 ${className}`}>
         {state && !state.ok && (
-          <div role="alert" className="rounded-xl bg-coral/10 px-4 py-3 text-sm font-semibold text-coral">
+          <div role="alert" className="rounded-xl bg-bad-soft px-4 py-3 text-sm font-semibold text-bad">
             {state.message}
           </div>
         )}
@@ -34,5 +34,5 @@ export function FieldError({ name }: { name: string }) {
   const errors = useContext(ErrorsCtx);
   const msg = errors[name];
   if (!msg) return null;
-  return <p className="mt-1 text-xs font-semibold text-coral">{msg}</p>;
+  return <p className="mt-1 text-xs font-semibold text-bad">{msg}</p>;
 }

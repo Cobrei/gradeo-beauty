@@ -135,6 +135,7 @@ export const appointmentSchema = z.object({
   notes: z.string().trim().max(500).optional(),
   source: z.enum(["APP", "ONLINE", "WALKIN", "CAMPAIGN"]).default("APP"),
   force: z.boolean().default(false),
+  marketingOptIn: z.boolean().optional(),
 });
 
 export async function createAppointment(actor: Actor, raw: unknown): Promise<{ id: string; conflict?: string }> {
@@ -157,7 +158,7 @@ export async function createAppointment(actor: Actor, raw: unknown): Promise<{ i
         const [dup] = await tx.select({ id: clients.id }).from(clients).where(and(eq(clients.phone, phone), isNull(clients.deletedAt))).limit(1);
         if (dup) clientId = dup.id;
         else {
-          const [c] = await tx.insert(clients).values({ ...ctx.stampCreate(), fullName: walkInName, phone, source: i.source === "ONLINE" ? "ONLINE" : "WALKIN", marketingOptIn: new Date() }).returning({ id: clients.id });
+          const [c] = await tx.insert(clients).values({ ...ctx.stampCreate(), fullName: walkInName, phone, source: i.source === "ONLINE" ? "ONLINE" : "WALKIN", marketingOptIn: i.source === "ONLINE" && !i.marketingOptIn ? null : new Date() }).returning({ id: clients.id });
           clientId = c.id;
         }
         walkInName = null;

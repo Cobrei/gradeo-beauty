@@ -105,7 +105,7 @@ export async function moveStock(actor: Actor, input: { productId: string; kind: 
     const [p] = await tx.select().from(products).where(eq(products.id, input.productId)).limit(1);
     if (!p) throw new NotFoundError("product", input.productId);
     const delta = input.kind === "IN" ? input.qty : input.kind === "ADJUST" ? input.qty - Number(p.stockQty) : -input.qty;
-    await tx.insert(stockMoves).values({ ...ctx.stampCreate(), productId: p.id, kind: input.kind, qty: String(Math.abs(delta)), unitCost: input.unitCost != null ? fromCents(input.unitCost) : null, reason: input.reason ?? null });
+    await tx.insert(stockMoves).values({ ...ctx.stampCreate(), productId: p.id, kind: input.kind, qty: input.kind === "ADJUST" ? String(delta) : String(Math.abs(delta)), unitCost: input.unitCost != null ? fromCents(input.unitCost) : null, reason: input.reason ?? null });
     await tx.update(products).set({ stockQty: sql`${products.stockQty} + ${String(delta)}`, ...ctx.stampUpdate(), ...(input.kind === "IN" && input.unitCost != null ? { costPrice: fromCents(input.unitCost) } : {}) }).where(eq(products.id, p.id));
   });
 }

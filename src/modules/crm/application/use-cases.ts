@@ -249,11 +249,13 @@ export async function importClients(actor: Actor, rows: ImportRow[]): Promise<{ 
 /** Aniversariantes dos próximos N dias (painel). */
 export async function upcomingBirthdays(actor: Actor, days = 7) {
   assertCan(actor, "crm.client.read");
+  // "hoje" no fuso do salão (o banco roda em UTC: depois das 21h já seria amanhã)
+  const today = todayISO();
   return withTenantRead(actor, (tx) =>
     tx
       .select({ id: clients.id, fullName: clients.fullName, phone: clients.phone, birthDate: clients.birthDate })
       .from(clients)
-      .where(sql`${clients.deletedAt} is null and ${clients.birthDate} is not null and (to_char(${clients.birthDate}, 'MMDD') between to_char(current_date, 'MMDD') and to_char(current_date + ${days}::int, 'MMDD') or (to_char(current_date + ${days}::int, 'MMDD') < to_char(current_date, 'MMDD') and (to_char(${clients.birthDate}, 'MMDD') >= to_char(current_date, 'MMDD') or to_char(${clients.birthDate}, 'MMDD') <= to_char(current_date + ${days}::int, 'MMDD'))))`)
+      .where(sql`${clients.deletedAt} is null and ${clients.birthDate} is not null and (to_char(${clients.birthDate}, 'MMDD') between to_char(${today}::date, 'MMDD') and to_char(${today}::date + ${days}::int, 'MMDD') or (to_char(${today}::date + ${days}::int, 'MMDD') < to_char(${today}::date, 'MMDD') and (to_char(${clients.birthDate}, 'MMDD') >= to_char(${today}::date, 'MMDD') or to_char(${clients.birthDate}, 'MMDD') <= to_char(${today}::date + ${days}::int, 'MMDD'))))`)
       .orderBy(sql`to_char(${clients.birthDate}, 'MMDD')`)
       .limit(20),
   );

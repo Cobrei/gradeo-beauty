@@ -1,3 +1,5 @@
+import { MoneyInput } from "@/components/ui/money-input";
+import { assertCan } from "@/lib/context";
 import Link from "next/link";
 import { Badge, Card, EmptyState, Field, LinkButton, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
@@ -10,6 +12,7 @@ export const metadata = { title: "Serviços" };
 
 export default async function ServicosPage({ searchParams }: { searchParams: Promise<{ editar?: string; novo?: string }> }) {
   const actor = await requireActor();
+  assertCan(actor, "catalog.service.manage");
   const sp = await searchParams;
   const all = await listServices(actor, { includeInactive: true });
   const editing = sp.editar ? all.find((s) => s.id === sp.editar) : undefined;
@@ -51,8 +54,8 @@ export default async function ServicosPage({ searchParams }: { searchParams: Pro
               <Field label="Categoria" name="category"><input id="category" name="category" className="field" list="cats" defaultValue={editing?.category ?? "Geral"} /><datalist id="cats">{cats.map((c) => <option key={c} value={c} />)}</datalist></Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Duração (min)" name="durationMin"><input id="durationMin" name="durationMin" type="number" min={5} step={5} className="field" required defaultValue={editing?.durationMin ?? 60} /></Field>
-                <Field label="Preço (R$)" name="price"><input id="price" name="price" inputMode="decimal" className="field" required defaultValue={editing ? fromCents(toCents(editing.price)) : ""} /></Field>
-                <Field label="Custo de insumo (R$)" name="cost"><input id="cost" name="cost" inputMode="decimal" className="field" defaultValue={editing ? fromCents(toCents(editing.cost)) : "0"} /></Field>
+                <Field label="Preço" name="price"><MoneyInput name="price" required defaultValue={editing ? editing.price : null} /></Field>
+                <Field label="Custo de insumo" name="cost"><MoneyInput name="cost" defaultValue={editing ? editing.cost : 0} /></Field>
                 <Field label="Comissão % (vazio = da profissional)" name="commissionPct"><input id="commissionPct" name="commissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing?.commissionPct != null ? Number(editing.commissionPct) : ""} /></Field>
                 <Field label="Ciclo de retorno (dias)" name="returnIntervalDays" hint="Usado para lembrar a cliente de voltar."><input id="returnIntervalDays" name="returnIntervalDays" type="number" min={1} className="field" defaultValue={editing?.returnIntervalDays ?? ""} /></Field>
               </div>

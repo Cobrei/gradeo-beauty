@@ -7,13 +7,14 @@ import { listServices } from "@/modules/catalog/application/use-cases";
 import { saveProfessionalAction } from "@/modules/team/ui/actions";
 import { SYSTEM_ROLES } from "@/lib/permissions";
 import { WEEKDAYS } from "@/lib/time";
-import { can } from "@/lib/context";
+import { can, assertCan } from "@/lib/context";
 import { formatPhone } from "@/lib/phone";
 
 export const metadata = { title: "Equipe" };
 
 export default async function EquipePage({ searchParams }: { searchParams: Promise<{ editar?: string; novo?: string }> }) {
   const actor = await requireActor();
+  assertCan(actor, "team.professional.manage");
   const sp = await searchParams;
   const [pros, services] = await Promise.all([listProfessionals(actor, { includeInactive: true }), listServices(actor)]);
   const editing = sp.editar ? await getProfessional(actor, sp.editar) : undefined;

@@ -1,3 +1,4 @@
+import { MoneyInput } from "@/components/ui/money-input";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, Field, PageHeader, Stat } from "@/components/ui";
@@ -42,7 +43,7 @@ export default async function ProdutoPage({ params }: { params: Promise<{ id: st
               </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Quantidade" name="qty"><input id="qty" name="qty" inputMode="decimal" className="field" required /></Field>
-                <Field label="Custo unitário (entrada)" name="unitCost"><input id="unitCost" name="unitCost" inputMode="decimal" className="field" /></Field>
+                <Field label="Custo unitário (entrada)" name="unitCost"><MoneyInput name="unitCost" /></Field>
               </div>
               <Field label="Motivo" name="reason"><input id="reason" name="reason" className="field" /></Field>
             </Form>
@@ -52,7 +53,7 @@ export default async function ProdutoPage({ params }: { params: Promise<{ id: st
           {moves.length === 0 ? <p className="text-sm text-muted">Nenhuma.</p> : (
             <ul className="divide-y divide-line text-sm">
               {moves.map((m) => (
-                <li key={m.id} className="flex justify-between py-1.5"><span>{KIND[m.kind]} {m.reason ? `· ${m.reason}` : ""}<div className="text-xs text-muted">{formatDateTime(m.createdAt)}</div></span><span className={`font-semibold ${["IN"].includes(m.kind) ? "text-ok" : "text-bad"}`}>{m.kind === "IN" ? "+" : "−"}{Number(m.qty)}</span></li>
+                <li key={m.id} className="flex justify-between py-1.5"><span>{KIND[m.kind]} {m.reason ? `· ${m.reason}` : ""}<div className="text-xs text-muted">{formatDateTime(m.createdAt)}</div></span>{(() => { const up = m.kind === "IN" || (m.kind === "ADJUST" && Number(m.qty) > 0); return <span className={`font-semibold ${up ? "text-ok" : "text-bad"}`}>{up ? "+" : "−"}{Math.abs(Number(m.qty))}</span>; })()}</li>
               ))}
             </ul>
           )}

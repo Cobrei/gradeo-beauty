@@ -4,7 +4,7 @@ import { appointments, cashMoves, cashSessions, clientCredits, clients, orderIte
 import { assertCan, can, withTenantRead, withTenantTx, type Actor, type TxContext } from "@/lib/context";
 import type { Tx } from "@/db/client";
 import { DomainError, NotFoundError } from "@/lib/errors";
-import { fromCents, toCents, type Cents } from "@/lib/money";
+import { fromCents, toCents, type Cents, formatBRL } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
 import { pct, totals, voucherDiscount } from "../domain/rules";
 
@@ -178,7 +178,7 @@ export async function applyVoucher(actor: Actor, orderId: string, code: string) 
     if (today < v.validFrom || today > v.validUntil) throw new DomainError("VOUCHER_INVALID", `Voucher válido de ${v.validFrom} a ${v.validUntil}.`);
     if (v.uses >= v.maxUses) throw new DomainError("VOUCHER_INVALID", "Este voucher já foi usado.");
     if (v.clientId && v.clientId !== o.clientId) throw new DomainError("VOUCHER_INVALID", "Este voucher é pessoal de outra cliente.");
-    if (c(o.subtotal) < c(v.minOrder)) throw new DomainError("VOUCHER_INVALID", `Pedido mínimo de R$ ${fromCents(c(v.minOrder))}.`);
+    if (c(o.subtotal) < c(v.minOrder)) throw new DomainError("VOUCHER_INVALID", `Pedido mínimo de ${formatBRL(c(v.minOrder))}.`);
     await tx.update(orders).set({ voucherId: v.id, ...ctx.stampUpdate() }).where(eq(orders.id, orderId));
     const t = await recalc(tx, ctx, orderId);
     if (t.voucher <= 0) {
@@ -218,7 +218,7 @@ export async function payOrder(actor: Actor, orderId: string, pays: { method: st
     const items = await tx.select().from(orderItems).where(and(eq(orderItems.orderId, orderId), isNull(orderItems.deletedAt)));
     if (!items.length) throw new DomainError("EMPTY", "A comanda está vazia.");
     const paid = pays.reduce((a, p) => a + p.amount, 0);
-    if (paid !== t.total) throw new DomainError("PAYMENT_MISMATCH", `Pagamentos somam R$ ${fromCents(paid)} e a comanda é R$ ${fromCents(t.total)}.`);
+    if (paid !== t.total) throw new DomainError("PAYMENT_MISMATCH", `Pagamentos somam ${formatBRL(paid)} e a comanda é ${formatBRL(t.total)}.`);
     const [session] = await tx.select({ id: cashSessions.id }).from(cashSessions).where(isNull(cashSessions.closedAt)).orderBy(desc(cashSessions.openedAt)).limit(1);
     if (pays.some((p) => p.method === "CASH") && !session) throw new DomainError("NO_CASH", "Abra o caixa antes de receber em dinheiro.");
     const now = new Date();

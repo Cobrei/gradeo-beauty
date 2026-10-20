@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { publicCatalog, publicSlots } from "@/modules/agenda/application/public-booking";
 import { publicBookAction } from "@/modules/agenda/ui/public-actions";
-import { fromCents, toCents } from "@/lib/money";
+import { fromCents, toCents, formatBRL } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
 import { addDays, WEEKDAYS_SHORT, weekdayOf } from "@/lib/time";
 import { formatPhone } from "@/lib/phone";
@@ -75,7 +75,7 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
                   {services.filter((s) => s.category === cat).map((s) => (
                     <Link key={s.id} href={q({ s: s.id })} className="card flex items-center justify-between gap-3 hover:ring-2 hover:ring-brand/40">
                       <div><div className="font-semibold">{s.name}</div><div className="text-xs text-muted">{s.durationMin} min{s.description ? ` · ${s.description}` : ""}</div></div>
-                      <div className="font-bold">{toCents(s.price) > 0 ? `R$ ${fromCents(toCents(s.price))}` : "consultar"}</div>
+                      <div className="font-bold">{toCents(s.price) > 0 ? `${formatBRL(toCents(s.price))}` : "consultar"}</div>
                     </Link>
                   ))}
                 </div>
@@ -119,11 +119,12 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
                 <input type="hidden" name="professionalId" value={pro.id} />
                 <input type="hidden" name="date" value={date} />
                 <input type="hidden" name="time" value={time} />
-                <div className="rounded-xl bg-mist px-3 py-2 text-sm"><b>{service.name}</b> com {pro.nickname ?? pro.name}<br />{date.split("-").reverse().join("/")} às {time} · {service.durationMin} min · {toCents(service.price) > 0 ? `R$ ${fromCents(toCents(service.price))}` : ""}</div>
+                <div className="rounded-xl bg-mist px-3 py-2 text-sm"><b>{service.name}</b> com {pro.nickname ?? pro.name}<br />{date.split("-").reverse().join("/")} às {time} · {service.durationMin} min · {toCents(service.price) > 0 ? `${formatBRL(toCents(service.price))}` : ""}</div>
                 {sp.erro && <p className="rounded-xl bg-bad-soft px-3 py-2 text-sm font-semibold text-bad">{sp.erro}</p>}
                 <div><label className="label" htmlFor="name">Seu nome</label><input id="name" name="name" required className="field" /></div>
                 <div><label className="label" htmlFor="phone">Seu WhatsApp</label><input id="phone" name="phone" required inputMode="tel" className="field" placeholder="(51) 99999-9999" /></div>
                 <div><label className="label" htmlFor="notes">Alguma observação?</label><input id="notes" name="notes" className="field" /></div>
+                <label className="flex items-start gap-2 text-sm text-ink-2"><input type="checkbox" name="optIn" className="mt-0.5 h-4 w-4 accent-[#b8475f]" /> Quero receber novidades e promoções do salão pelo WhatsApp (os avisos do meu horário chegam de qualquer jeito).</label>
                 <button className="btn btn-primary w-full">Pedir horário</button>
                 <p className="text-center text-xs text-muted">Você recebe a confirmação pelo WhatsApp {salon.whatsapp ? formatPhone(salon.whatsapp) : ""}.</p>
               </form>

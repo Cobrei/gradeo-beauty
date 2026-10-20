@@ -4,7 +4,7 @@ import { z } from "zod";
 import { campaigns, clients, messages, vouchers, type SegmentRule } from "@/db/schema";
 import { assertCan, can, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { DomainError, NotFoundError } from "@/lib/errors";
-import { fromCents, toCents, type Cents } from "@/lib/money";
+import { fromCents, toCents, type Cents, parseReais } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
 import { addDays } from "@/lib/time";
 import { getSettings } from "@/modules/core/application/settings";
@@ -27,7 +27,7 @@ export const campaignSchema = z.object({
   }),
   message: z.string().trim().min(10, "Escreva a mensagem.").max(1000),
   voucherKind: z.enum(["PERCENT", "AMOUNT"]).optional(),
-  voucherValue: z.coerce.number().positive().optional(),
+  voucherValue: z.preprocess((v) => (v === "" || v === undefined || v === null ? undefined : parseReais(v)), z.number().positive().optional()),
   voucherDays: z.coerce.number().int().min(1).max(365).optional(),
   voucherServiceId: z.string().uuid().optional(),
 });
@@ -212,8 +212,8 @@ export const voucherSchema = z.object({
   name: z.string().trim().min(2).max(120),
   code: z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{3,24}$/, "Só letras, números e hífen.").optional().or(z.literal("")),
   kind: z.enum(["PERCENT", "AMOUNT"]),
-  value: z.coerce.number().positive("Valor maior que zero."),
-  minOrder: z.coerce.number().min(0).default(0),
+  value: z.preprocess((v) => parseReais(v), z.number().positive("Valor maior que zero.")),
+  minOrder: z.preprocess((v) => parseReais(v), z.number().min(0)).default(0),
   serviceId: z.string().uuid().optional().or(z.literal("")),
   validFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),

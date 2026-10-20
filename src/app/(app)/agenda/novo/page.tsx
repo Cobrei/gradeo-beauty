@@ -1,3 +1,4 @@
+import { MoneyInput } from "@/components/ui/money-input";
 import Link from "next/link";
 import { Avatar, Card, Field, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
@@ -9,7 +10,7 @@ import { availableSlots } from "@/modules/agenda/application/use-cases";
 import { createAppointmentAction } from "@/modules/agenda/ui/actions";
 import { todayISO } from "@/lib/dates";
 import { formatPhone } from "@/lib/phone";
-import { fromCents, toCents } from "@/lib/money";
+import { fromCents, toCents, formatBRL } from "@/lib/money";
 
 export const metadata = { title: "Agendar" };
 
@@ -91,7 +92,7 @@ export default async function NovoAgendamento({ searchParams }: { searchParams: 
                   <option value="" disabled>Escolha…</option>
                   {services.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.name} · {s.durationMin} min · R$ {fromCents(toCents(s.price))}
+                      {s.name} · {s.durationMin} min · {formatBRL(toCents(s.price))}
                     </option>
                   ))}
                 </select>
@@ -130,8 +131,8 @@ export default async function NovoAgendamento({ searchParams }: { searchParams: 
               <Field label="Duração (min)" name="durationMin">
                 <input id="durationMin" name="durationMin" type="number" min={5} step={5} className="field" defaultValue={svc?.durationMin ?? ""} placeholder="padrão do serviço" />
               </Field>
-              <Field label="Preço (R$)" name="price">
-                <input id="price" name="price" inputMode="decimal" className="field" defaultValue={svc ? fromCents(toCents(svc.price)) : ""} />
+              <Field label="Preço" name="price">
+                <MoneyInput name="price" defaultValue={svc ? svc.price : null} />
               </Field>
               <Field label="Origem" name="source">
                 <select id="source" name="source" className="field" defaultValue="APP">

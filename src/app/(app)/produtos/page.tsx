@@ -1,3 +1,4 @@
+import { MoneyInput } from "@/components/ui/money-input";
 import Link from "next/link";
 import { Badge, Card, EmptyState, Field, LinkButton, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
@@ -56,8 +57,8 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Pro
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Marca" name="brand"><input id="brand" name="brand" className="field" defaultValue={editing?.brand ?? ""} /></Field>
                 <Field label="Código / SKU" name="sku"><input id="sku" name="sku" className="field" defaultValue={editing?.sku ?? ""} /></Field>
-                <Field label="Preço de venda" name="salePrice"><input id="salePrice" name="salePrice" inputMode="decimal" className="field" required defaultValue={editing ? fromCents(toCents(editing.salePrice)) : ""} /></Field>
-                <Field label="Custo" name="costPrice"><input id="costPrice" name="costPrice" inputMode="decimal" className="field" defaultValue={editing ? fromCents(toCents(editing.costPrice)) : "0"} /></Field>
+                <Field label="Preço de venda" name="salePrice"><MoneyInput name="salePrice" required defaultValue={editing ? editing.salePrice : null} /></Field>
+                <Field label="Custo" name="costPrice"><MoneyInput name="costPrice" defaultValue={editing ? editing.costPrice : 0} /></Field>
                 <Field label="Unidade" name="unit"><input id="unit" name="unit" className="field" defaultValue={editing?.unit ?? "un"} /></Field>
                 <Field label="Estoque mínimo" name="minStock"><input id="minStock" name="minStock" inputMode="decimal" className="field" defaultValue={editing ? Number(editing.minStock) : 0} /></Field>
               </div>

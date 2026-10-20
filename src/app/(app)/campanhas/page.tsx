@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatBRL } from "@/lib/money";
 import { Badge, Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
 import { requireActor } from "@/modules/core/application/auth";
 import { listCampaigns } from "@/modules/marketing/application/campaigns";
@@ -43,7 +44,7 @@ export default async function CampanhasPage() {
             <tbody>
               {rows.map((c) => (
                 <tr key={c.id} className="hover:bg-mist/50">
-                  <td><Link href={`/campanhas/${c.id}`} className="font-semibold hover:underline">{c.name}</Link>{c.voucherKind && <div className="text-xs text-muted">voucher {c.voucherKind === "PERCENT" ? `${Number(c.voucherValue)}%` : `R$ ${Number(c.voucherValue).toFixed(2)}`}</div>}</td>
+                  <td><Link href={`/campanhas/${c.id}`} className="font-semibold hover:underline">{c.name}</Link>{c.voucherKind && <div className="text-xs text-muted">voucher {c.voucherKind === "PERCENT" ? `${Number(c.voucherValue)}%` : formatBRL(Math.round(Number(c.voucherValue) * 100))}</div>}</td>
                   <td className="text-sm">{describeSegment(c.segment)}</td>
                   <td className="text-right">{c.audienceCount}</td>
                   <td className="text-right">{c.sentCount}{c.failedCount ? <span className="text-bad"> ({c.failedCount} falhas)</span> : ""}</td>

@@ -49,7 +49,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
       <ModuleGrid actor={actor} />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Faturado hoje" value={formatBRL(d.revenueToday)} hint={`${d.ordersToday} comanda${d.ordersToday === 1 ? "" : "s"} · mês ${formatBRL(d.revenueMonth)}`} tone="ok" href={can(actor, "report.read") ? "/relatorios" : undefined} />
+        {can(actor, "report.read") && <Stat label="Faturado hoje" value={formatBRL(d.revenueToday)} hint={`${d.ordersToday} comanda${d.ordersToday === 1 ? "" : "s"} · mês ${formatBRL(d.revenueMonth)}`} tone="ok" href="/relatorios" />}
         <Stat label="Atendimentos hoje" value={d.appts.total} hint={`${d.appts.done} finalizados${d.appts.requested ? ` · ${d.appts.requested} pedidos online` : ""}`} tone="info" href="/agenda" />
         <Stat label="Clientes sumidas" value={d.inactiveCount} hint={`≈ ${formatBRL(d.inactiveValue)} por visita de retorno`} tone="brand" href="/clientes?seg=INACTIVE" />
         <Stat label="Mensagens pendentes" value={d.pendingMessages} hint={d.pendingMessages ? "para enviar pelo WhatsApp" : "tudo enviado"} tone={d.pendingMessages ? "warn" : "mist"} href="/mensagens" />

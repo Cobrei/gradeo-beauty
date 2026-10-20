@@ -19,7 +19,7 @@ export function renderTemplate(template: string, vars: TemplateVars): string {
 }
 
 export function voucherLabel(kind: "PERCENT" | "AMOUNT", value: number): string {
-  return kind === "PERCENT" ? `${value}% de desconto` : `R$ ${(value / 100).toFixed(2).replace(".", ",")} de desconto`;
+  return kind === "PERCENT" ? `${value}% de desconto` : `R$ ${(value / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} de desconto`;
 }
 
 export function formatBRDate(iso: string): string {

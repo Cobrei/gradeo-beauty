@@ -39,9 +39,9 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
   const alerts = data.notes.filter((n) => n.kind === "ALLERGY");
   const formulas = data.notes.filter((n) => n.kind === "FORMULA");
   const timeline = [
-    ...data.orders.map((o) => ({ key: `o${o.id}`, date: o.serviceDate, kind: "order" as const, o })),
-    ...data.appointments.filter((a) => a.status !== "DONE").map((a) => ({ key: `a${a.id}`, date: formatDateTime(a.startsAt), kind: "appt" as const, a })),
-  ].sort((x, y) => (x.date < y.date ? 1 : -1));
+    ...data.orders.map((o) => ({ key: `o${o.id}`, sortKey: `${o.serviceDate}T23:59`, date: o.serviceDate, kind: "order" as const, o })),
+    ...data.appointments.filter((a) => a.status !== "DONE").map((a) => ({ key: `a${a.id}`, sortKey: a.startsAt.toISOString(), date: formatDateTime(a.startsAt), kind: "appt" as const, a })),
+  ].sort((x, y) => (x.sortKey < y.sortKey ? 1 : -1));
   const inviteMsg = `Oi ${first}! Sentimos sua falta no ${settings.salonName} 💕 Que tal marcar um horário essa semana? Me diz o melhor dia que eu reservo pra você.`;
 
   return (

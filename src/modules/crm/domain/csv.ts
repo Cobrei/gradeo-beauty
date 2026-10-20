@@ -16,8 +16,9 @@ export function parseCsv(text: string): ImportRow[] {
   const idx = {
     name: hasHeader ? first.findIndex((h) => /^(nome|name|cliente|given name|first name|full name)/.test(h)) : 0,
     last: hasHeader ? first.findIndex((h) => /(sobrenome|family name|last name)/.test(h)) : -1,
-    phone: hasHeader ? first.findIndex((h) => /(telefone|phone|celular|whatsapp|fone|mobile)/.test(h)) : 1,
-    email: hasHeader ? first.findIndex((h) => /e-?mail/.test(h)) : 2,
+    // Google Contatos traz "Phone 1 - Label" (Mobile) antes de "Phone 1 - Value": ignora colunas de rótulo/tipo
+    phone: hasHeader ? first.findIndex((h) => /(telefone|phone|celular|whatsapp|fone|mobile)/.test(h) && !/(label|type|tipo|rotulo)/.test(h)) : 1,
+    email: hasHeader ? first.findIndex((h) => /e-?mail/.test(h) && !/(label|type|tipo|rotulo)/.test(h)) : 2,
     birth: hasHeader ? first.findIndex((h) => /(nascimento|birthday|aniversario|birth)/.test(h)) : 3,
     last_visit: hasHeader ? first.findIndex((h) => /(ultima|last visit|ultimo atendimento|visita)/.test(h)) : 4,
     notes: hasHeader ? first.findIndex((h) => /(obs|notes|notas|observa)/.test(h)) : -1,
@@ -75,14 +76,23 @@ function split(line: string, sep: string): string[] {
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
 const pick = (cols: string[], i: number) => (i >= 0 ? cols[i] || undefined : undefined);
 
-/** dd/mm/aaaa, dd/mm/aa, aaaa-mm-dd → aaaa-mm-dd */
+/** dd/mm/aaaa, dd/mm/aa, aaaa-mm-dd → aaaa-mm-dd; data impossível (31/02) vira vazia em vez de derrubar a importação */
 export function toISO(s?: string): string | undefined {
   if (!s) return undefined;
+  let y: number, mo: number, d: number;
   const m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/.exec(s.trim());
-  if (m) {
-    const y = m[3].length === 2 ? `19${m[3]}`.replace(/^19([0-3])/, "20$1") : m[3];
-    return `${y}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
-  }
   const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(s.trim());
-  return iso ? `${iso[1]}-${iso[2]}-${iso[3]}` : undefined;
+  if (m) {
+    d = Number(m[1]);
+    mo = Number(m[2]);
+    y = Number(m[3]);
+    if (m[3].length === 2) y += y > Number(String(new Date().getFullYear()).slice(2)) ? 1900 : 2000;
+  } else if (iso) {
+    y = Number(iso[1]);
+    mo = Number(iso[2]);
+    d = Number(iso[3]);
+  } else return undefined;
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d || y < 1900 || y > 2100) return undefined;
+  return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }

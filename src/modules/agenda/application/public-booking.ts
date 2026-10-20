@@ -31,7 +31,7 @@ export async function publicSlots(slug: string, dateISO: string, professionalId:
   return availableSlots(salon.tenantId, dateISO, professionalId, serviceId, { leadMinutes: salon.onlineBookingLeadMin, publicOnly: true });
 }
 
-export async function publicBook(slug: string, input: { professionalId: string; serviceId: string; date: string; time: string; name: string; phone: string; notes?: string }) {
+export async function publicBook(slug: string, input: { professionalId: string; serviceId: string; date: string; time: string; name: string; phone: string; notes?: string; marketingOptIn?: boolean }) {
   const salon = await getPublicSalon(slug);
   if (!salon || !salon.onlineBooking) throw new DomainError("CLOSED", "Agendamento online indisponível.");
   const slots = await availableSlots(salon.tenantId, input.date, input.professionalId, input.serviceId, { leadMinutes: salon.onlineBookingLeadMin, publicOnly: true });
