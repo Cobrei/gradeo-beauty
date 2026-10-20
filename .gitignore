@@ -3,3 +3,5 @@ node_modules
 .env.local
 *.tsbuildinfo
 next-env.d.ts
+e2e/shots/
+e2e/prod/
