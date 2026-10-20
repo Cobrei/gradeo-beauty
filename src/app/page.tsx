@@ -7,22 +7,38 @@ import { FEATURES, PLANS, PROMO_NOTE, TRIAL_DAYS, brl, type Cell } from "@/confi
 import { getActor } from "@/modules/core/application/auth";
 
 export const metadata = {
-  title: { absolute: "gradeo beauty · Sistema para salão de beleza, barbearia e estética" },
+  title: { absolute: "gradeo beauty · Sistema de gestão para salão de beleza, barbearia e estética" },
   description:
-    "Agenda, comanda, caixa, comissões e um CRM que traz a cliente de volta: campanhas e vouchers pelo WhatsApp, medidos até o caixa. Teste grátis.",
+    "Organize o salão do agendamento ao fechamento do caixa: agenda, comanda, caixa, estoque, comissões e relatórios num só lugar. De bônus, ferramentas para trazer e reter clientes. Teste grátis.",
 };
 
 const WA = `https://wa.me/${BRAND.supportWhatsApp}?text=${encodeURIComponent("Olá! Quero conhecer o gradeo beauty.")}`;
 
 const STEPS = [
-  { n: "1", t: "Cada visita vira histórico", d: "A comanda fecha e a ficha da cliente atualiza sozinha: serviços, gasto, fórmula, alergia, profissional preferida." },
-  { n: "2", t: "O sistema percebe quem sumiu", d: "Pelo ritmo de cada cliente e o ciclo de cada serviço, o gradeo separa quem está atrasada, quem faz aniversário e quem veio só uma vez." },
-  { n: "3", t: "Você chama de volta e mede", d: "Monte uma campanha com voucher pessoal em 2 minutos. O gradeo mostra quem voltou e quanto entrou no caixa." },
+  { n: "1", t: "A agenda organiza o dia", d: "Horários de toda a equipe numa tela, por dia ou semana. Encaixe, bloqueio e remarcação sem conflito, e a cliente confirma presença pelo link." },
+  { n: "2", t: "A comanda registra tudo", d: "Serviços, produtos e quem atendeu. O estoque baixa sozinho e a ficha da cliente atualiza a cada visita." },
+  { n: "3", t: "O caixa e as comissões fecham sozinhos", d: "Pix, cartão e dinheiro separados, sangria e suprimento, conferência da gaveta. A comissão de cada profissional sai calculada item a item." },
+  { n: "4", t: "Você enxerga o negócio", d: "Faturamento, ticket médio, serviços que mais vendem, desempenho por profissional e quanto sobrou. Sem planilha." },
+];
+
+const RETAIN = [
+  { t: "Agendamento online pelo link do salão", d: "Na bio do Instagram e no WhatsApp. A cliente marca sozinha, a qualquer hora, sem comissão por agendamento." },
+  { t: "Lembrete e confirmação automáticos", d: "Menos falta: a cliente recebe o lembrete e confirma a presença com um toque." },
+  { t: "Retorno, aniversário e sumidas", d: "Convite no ciclo de cada serviço, parabéns com voucher e campanha para quem não aparece há tempo. Você vê quem voltou e quanto entrou no caixa." },
+  { t: "Pesquisa de satisfação e fidelidade (opcionais)", d: "Quem dá nota alta é convidada a avaliar o salão no Google; a cada X visitas, a cliente ganha um presente." },
+];
+
+const PAINS = [
+  { t: "Agenda espalhada", d: "Um horário no caderno, outro no WhatsApp, outro na memória. Conflito, esquecimento e cliente esperando." },
+  { t: "Caixa que não bate", d: "Fecha o dia sem saber quanto entrou no Pix, no cartão e no dinheiro, nem por que sobrou ou faltou." },
+  { t: "Comissão de cabeça", d: "Fim do mês vira discussão: quem atendeu, qual serviço, qual percentual." },
+  { t: "Estoque no escuro", d: "O produto acaba na hora do atendimento e ninguém sabe quanto se gastou." },
 ];
 
 const FAQ = [
   { q: "Preciso instalar alguma coisa?", a: "Não. O gradeo beauty abre no navegador do celular, tablet ou computador. No celular dá para adicionar à tela inicial e usar como um app." },
-  { q: "Como funcionam as mensagens de WhatsApp?", a: "No modo manual, que já vem ligado e não tem custo, um toque abre o WhatsApp com a mensagem pronta e o sistema marca como enviada. Nos planos Pro e Mega, o envio automático pelo WhatsApp oficial do próprio salão está chegando." },
+  { q: "Como funcionam as mensagens de WhatsApp?", a: "No modo manual, que já vem ligado e não tem custo, um toque abre o WhatsApp com a mensagem pronta e o sistema marca como enviada. Nos planos Pro e Mega, o salão pode conectar o próprio WhatsApp por QR code para os lembretes e confirmações saírem sozinhos." },
+  { q: "O sistema substitui o caderno e a planilha?", a: "Sim. Agenda, comanda, caixa, estoque, comissões e relatórios ficam no mesmo lugar, no celular ou no computador, com acesso separado para cada pessoa da equipe." },
   { q: "Consigo trazer minhas clientes de outro sistema?", a: "Sim. Importe uma planilha, a lista de contatos do celular ou cole o texto. O gradeo junta duplicadas pelo telefone." },
   { q: "Cada pessoa da equipe tem o próprio acesso?", a: "Sim. Há perfis de dona, gerente, recepção, profissional e financeiro, cada um com o que precisa para trabalhar." },
   { q: "Tem fidelidade ou multa?", a: "Não. Você paga mês a mês e cancela quando quiser." },
@@ -43,6 +59,7 @@ export default async function Home() {
           </Link>
           <nav className="hidden gap-6 text-sm font-semibold text-ink-2 md:flex">
             <a href="#como" className="hover:text-brand">Como funciona</a>
+            <a href="#bonus" className="hover:text-brand">Clientes</a>
             <a href="#recursos" className="hover:text-brand">Recursos</a>
             <a href="#planos" className="hover:text-brand">Planos</a>
             <a href="#perguntas" className="hover:text-brand">Perguntas</a>
@@ -67,13 +84,13 @@ export default async function Home() {
           <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-12 md:grid-cols-[1.05fr_1fr] md:px-8 md:pb-24 md:pt-20">
             <div>
               <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand shadow-sm">
-                <MirrorO size={14} /> Salão · Barbearia · Estética
+                <MirrorO size={14} /> Gestão para salão · barbearia · estética
               </p>
               <h1 className="text-[2.6rem] font-extrabold leading-[1.02] tracking-tight [text-wrap:balance] md:text-6xl">
-                Suas clientes de volta, <span className="text-brand">sua agenda cheia.</span>
+                Seu salão organizado, <span className="text-brand">do horário marcado ao caixa fechado.</span>
               </h1>
               <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-2">
-                Agenda, comanda, caixa e comissões num só lugar, e um CRM que avisa quem sumiu e traz de volta com campanhas e vouchers pelo WhatsApp, medidos até o caixa.
+                Agenda, comanda, caixa, estoque, comissões e relatórios num só sistema, no celular ou no computador. E de bônus: ferramentas para trazer clientes novas e fazer quem sumiu voltar.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/cadastro" className="btn btn-primary px-6 text-lg">Criar meu salão grátis</Link>
@@ -91,7 +108,7 @@ export default async function Home() {
                   <span className="h-2.5 w-2.5 rounded-full bg-[#e8a0ad]" />
                   <span className="h-2.5 w-2.5 rounded-full bg-[#e9c89a]" />
                   <span className="h-2.5 w-2.5 rounded-full bg-[#a8d5c4]" />
-                  <span className="ml-3 truncate text-[11px] text-muted">gradeo.com.br · Studio Bela</span>
+                  <span className="ml-3 truncate text-[11px] text-muted">beauty.gradeo.com.br · Studio Bela</span>
                 </div>
                 <Image src="/landing/painel-main.png" alt="Painel do gradeo beauty com atalhos coloridos, faturamento do dia e clientes sumidas" width={1040} height={900} priority className="h-auto w-full" />
               </div>
@@ -104,14 +121,17 @@ export default async function Home() {
 
         {/* dor */}
         <section className="bg-ink text-white">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 md:grid-cols-3 md:px-8">
-            <div className="md:col-span-1">
-              <h2 className="text-3xl font-extrabold leading-tight [text-wrap:balance]">A cliente some e ninguém percebe.</h2>
+          <div className="mx-auto max-w-6xl px-4 py-14 md:px-8 md:py-20">
+            <h2 className="max-w-2xl text-3xl font-extrabold leading-tight [text-wrap:balance] md:text-4xl">O salão cresce. A gestão continua no caderno, no WhatsApp e na memória.</h2>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {PAINS.map((p) => (
+                <div key={p.t} className="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+                  <div className="font-bold text-[#e9c89a]">{p.t}</div>
+                  <p className="mt-2 text-sm leading-relaxed text-white/75">{p.d}</p>
+                </div>
+              ))}
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 md:col-span-2">
-              <p className="text-white/80">Ela fazia escova todo mês. Faz três meses que não aparece. A agenda de papel não avisa, e o WhatsApp tem mil conversas. Ela foi para o salão da esquina.</p>
-              <p className="text-white/80">O gradeo beauty olha a sua base todo dia e mostra quem está atrasada no ciclo, quanto isso vale em reais e qual mensagem mandar. <strong className="text-[#e9c89a]">Uma campanha de retorno paga o mês do sistema.</strong></p>
-            </div>
+            <p className="mt-8 max-w-2xl text-white/85">O gradeo beauty junta tudo num lugar só: <strong className="text-white">você sabe o que tem para hoje, quanto entrou, quanto cada profissional recebe e quanto sobrou.</strong></p>
           </div>
         </section>
 
@@ -119,7 +139,7 @@ export default async function Home() {
         <section id="como" className="scroll-mt-20">
           <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
             <p className="text-xs font-bold uppercase tracking-wider text-brand">Como funciona</p>
-            <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">A máquina de retenção do seu salão</h2>
+            <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Um dia de salão, do primeiro horário ao fechamento</h2>
             <div className="mt-10 grid items-start gap-10 md:grid-cols-2">
               <ol className="space-y-6">
                 {STEPS.map((s) => (
@@ -132,10 +152,16 @@ export default async function Home() {
                   </li>
                 ))}
               </ol>
-              <figure className="overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
-                <Image src="/landing/campanha.png" alt="Campanha de retorno com voucher pessoal para 21 clientes sumidas" width={1040} height={860} className="h-auto w-full" />
-                <figcaption className="border-t border-line px-4 py-3 text-sm text-muted">Campanha “Sentimos sua falta”: 21 clientes, voucher pessoal de 15%, mensagem pronta para cada uma.</figcaption>
-              </figure>
+              <div className="space-y-5">
+                <figure className="overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
+                  <Image src="/landing/agenda-semana.png" alt="Agenda da semana com os horários de cada profissional em cores" width={1060} height={600} className="h-auto w-full" />
+                  <figcaption className="border-t border-line px-4 py-3 text-sm text-muted">Agenda da semana: cada profissional numa cor, total de atendimentos e valor previsto.</figcaption>
+                </figure>
+                <figure className="overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
+                  <Image src="/landing/relatorios.png" alt="Relatório com faturamento, ticket médio, serviços, produtos e desempenho por profissional" width={1060} height={570} className="h-auto w-full" />
+                  <figcaption className="border-t border-line px-4 py-3 text-sm text-muted">Relatórios: faturamento, ticket médio e quanto cada profissional produziu no mês.</figcaption>
+                </figure>
+              </div>
             </div>
           </div>
         </section>
@@ -144,7 +170,7 @@ export default async function Home() {
         <section id="recursos" className="scroll-mt-20 bg-mist">
           <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
             <p className="text-xs font-bold uppercase tracking-wider text-brand">Recursos</p>
-            <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Tudo que o salão usa no dia, numa tela só</h2>
+            <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Tudo para administrar o salão, numa tela só</h2>
             <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {MODULES.filter((m) => m.href !== "/configuracoes").map((m) => (
                 <div key={m.href} className="rounded-[var(--radius-card)] bg-white p-4 shadow-[0_1px_2px_rgba(35,26,41,.05),0_4px_16px_rgba(35,26,41,.05)]">
@@ -158,6 +184,32 @@ export default async function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* bônus: clientes vindo e voltando */}
+        <section id="bonus" className="scroll-mt-20">
+          <div className="mx-auto max-w-6xl px-4 pt-16 md:px-8 md:pt-24">
+            <p className="text-xs font-bold uppercase tracking-wider text-gold">Bônus de quem organiza</p>
+            <h2 className="mt-2 max-w-3xl text-3xl font-extrabold tracking-tight [text-wrap:balance] md:text-4xl">Com o salão organizado, o sistema ainda ajuda a cliente a vir e a voltar</h2>
+            <p className="mt-3 max-w-2xl text-ink-2">Cada atendimento registrado vira histórico. Com ele, o gradeo beauty mostra quem está atrasada no ciclo, quem sumiu e quem faz aniversário, e prepara a mensagem certa.</p>
+          </div>
+          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-2 md:px-8">
+            <ol className="space-y-5">
+              {RETAIN.map((s, i) => (
+                <li key={s.t} className="flex gap-4">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-soft text-base font-extrabold text-[#8a6420]">{i + 1}</span>
+                  <div>
+                    <h3 className="font-bold">{s.t}</h3>
+                    <p className="mt-1 text-ink-2">{s.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <figure className="overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
+              <Image src="/landing/campanha.png" alt="Campanha de retorno com voucher pessoal para clientes sumidas" width={1040} height={860} className="h-auto w-full" />
+              <figcaption className="border-t border-line px-4 py-3 text-sm text-muted">Campanha “Sentimos sua falta”: voucher pessoal e mensagem pronta para cada cliente, com medição de quem voltou.</figcaption>
+            </figure>
           </div>
         </section>
 
@@ -200,7 +252,7 @@ export default async function Home() {
               <h2 className="text-2xl font-extrabold tracking-tight [text-wrap:balance]">WhatsApp funcionando no primeiro dia</h2>
             </div>
             <p className="text-ink-2">Lembrete de horário, agradecimento, convite de retorno no ciclo do serviço e parabéns com voucher. As mensagens ficam prontas numa fila; um toque abre o WhatsApp e já marca como enviada.</p>
-            <p className="text-ink-2">Sem custo por mensagem no modo manual e sem pagar comissão sobre a sua própria base. Em breve, o envio automático pelo WhatsApp oficial do próprio salão: as mensagens saem do seu número.</p>
+            <p className="text-ink-2">Sem custo por mensagem no modo manual e sem pagar comissão sobre a sua própria base. Nos planos Pro e Mega, conecte o WhatsApp do salão por QR code e os lembretes saem sozinhos, do seu número.</p>
           </div>
         </section>
 
