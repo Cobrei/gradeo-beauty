@@ -42,7 +42,7 @@ export async function appointmentByToken(token: string) {
     .limit(1);
   if (!a) return null;
   const salon = await getPublicSalonById(a.tenantId);
-  return salon ? { appt: a, salon } : null;
+  return salon ? { appt: a, salon, isPast: a.startsAt.getTime() < Date.now() } : null;
 }
 
 /** A cliente confirma presença pelo link. Só vale para horário marcado e futuro. */

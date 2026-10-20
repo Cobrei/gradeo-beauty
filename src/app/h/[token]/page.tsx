@@ -12,10 +12,9 @@ export default async function HorarioPage({ params, searchParams }: { params: Pr
   const { r } = await searchParams;
   const data = await appointmentByToken(token);
   if (!data) notFound();
-  const { appt: a, salon } = data;
+  const { appt: a, salon, isPast: past } = data;
   const l = dateToLocal(a.startsAt);
   const name = (a.clientName ?? a.walkInName ?? "").split(" ")[0];
-  const past = a.startsAt.getTime() < Date.now();
   const status = a.status === "CONFIRMED" ? "Presença confirmada" : a.status === "REQUESTED" ? "Aguardando o salão confirmar" : a.status === "CANCELLED" ? "Horário cancelado" : a.status === "DONE" ? "Atendimento realizado" : a.status === "NO_SHOW" ? "Não compareceu" : "Horário marcado";
   const reschedule = salon.whatsapp
     ? `https://wa.me/55${salon.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Oi! Sou ${a.clientName ?? a.walkInName ?? ""} e preciso remarcar meu horário de ${a.serviceName} em ${l.date.split("-").reverse().join("/")} às ${l.time}.`)}`
