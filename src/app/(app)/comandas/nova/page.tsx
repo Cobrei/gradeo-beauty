@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ClientPicker } from "@/components/ui/client-picker";
 import { redirect } from "next/navigation";
 import { Avatar, Card, Field, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
@@ -43,10 +44,7 @@ export default async function NovaComanda({ searchParams }: { searchParams: Prom
           </Form>
         ) : (
           <>
-            <form action="/comandas/nova" className="flex gap-2">
-              <input name="q" defaultValue={q} placeholder="Nome ou telefone" className="field" autoFocus />
-              <button className="btn btn-secondary">Buscar</button>
-            </form>
+            <ClientPicker hrefTemplate="/comandas/nova?c=__ID__" emptyHint="Ninguém com esse nome. Use a venda avulsa abaixo ou cadastre a cliente." />
             <ul className="mt-2 divide-y divide-line">
               {results.map((r) => (
                 <li key={r.id}>

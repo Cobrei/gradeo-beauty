@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LiveSearch } from "@/components/ui/live-search";
 import { Avatar, Badge, Card, EmptyState, LinkButton, PageHeader, WaLink } from "@/components/ui";
 import { requireActor } from "@/modules/core/application/auth";
 import { getSettings } from "@/modules/core/application/settings";
@@ -49,11 +50,9 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
           {can(actor, "mkt.campaign.manage") && current.count > 0 && <LinkButton href={`/campanhas/nova?preset=${current.key}`}>Criar campanha para elas</LinkButton>}
         </Card>
       )}
-      <form action="/clientes" className="mb-4 flex gap-2">
-        {seg && <input type="hidden" name="seg" value={seg} />}
-        <input name="q" defaultValue={sp.q ?? ""} placeholder="Buscar por nome, telefone ou e-mail" className="field" />
-        <button className="btn btn-secondary">Buscar</button>
-      </form>
+      <div className="mb-4">
+        <LiveSearch placeholder="Digite nome, telefone ou e-mail: a lista filtra enquanto você escreve" />
+      </div>
       {rows.length === 0 ? (
         <EmptyState title={sp.q ? "Nenhuma cliente encontrada" : "Sua base começa aqui"} hint={sp.q ? "Tente só o primeiro nome ou parte do telefone." : "Importe os contatos do celular ou uma planilha e em 1 minuto você já pode disparar uma campanha."} action={can(actor, "crm.client.import") ? <LinkButton href="/clientes/importar">Importar clientes</LinkButton> : undefined} />
       ) : (

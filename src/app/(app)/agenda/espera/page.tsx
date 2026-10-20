@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ClientPicker } from "@/components/ui/client-picker";
 import { Badge, Card, EmptyState, Field, PageHeader, WaLink } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
@@ -59,10 +60,7 @@ export default async function EsperaPage({ searchParams }: { searchParams: Promi
         <Card title="Adicionar à espera">
           {!chosen ? (
             <>
-              <form action="/agenda/espera" className="flex gap-2">
-                <input name="q" defaultValue={q} placeholder="Buscar cliente" className="field" />
-                <button className="btn btn-secondary">Buscar</button>
-              </form>
+              <ClientPicker hrefTemplate="/agenda/espera?c=__ID__" autoFocus={false} />
               <ul className="mt-2 divide-y divide-line text-sm">
                 {found.map((f) => (
                   <li key={f.id}>
