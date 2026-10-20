@@ -37,6 +37,8 @@ export const salonSettings = pgTable(
     // marca do salão: logo (imagem reduzida, data URL) e cor de destaque
     logoData: text("logo_data"),
     brandColor: varchar("brand_color", { length: 7 }),
+    /** Lei do Salão-Parceiro (13.352/2016): mostra CNPJ do profissional e o relatório de cota-parte. */
+    partnerMode: boolean("partner_mode").notNull().default(false),
     onboardingDone: boolean("onboarding_done").notNull().default(false),
   },
   (t) => [uniqueIndex("uq_settings_tenant").on(t.tenantId), uniqueIndex("uq_settings_slug").on(t.slug)],
@@ -58,6 +60,7 @@ export const professionals = pgTable(
     workingHours: jsonb("working_hours").$type<OpeningHours>().notNull().default({}),
     serviceIds: jsonb("service_ids").$type<string[]>().notNull().default([]), // vazio = todos
     acceptsOnline: boolean("accepts_online").notNull().default(true),
+    cnpj: varchar("cnpj", { length: 18 }),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
   },

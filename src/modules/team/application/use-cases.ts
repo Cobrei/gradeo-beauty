@@ -6,6 +6,7 @@ import { professionals, roles, userRoles, users, type OpeningHours } from "@/db/
 import { assertCan, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { DomainError, NotFoundError } from "@/lib/errors";
 import { normalizePhone } from "@/lib/phone";
+import { isValidCnpj, normalizeCnpj } from "@/lib/cnpj";
 import { hashPassword } from "@/modules/core/application/auth";
 
 export const professionalSchema = z.object({
@@ -16,6 +17,7 @@ export const professionalSchema = z.object({
   commissionPct: z.coerce.number().min(0).max(100).default(40),
   productCommissionPct: z.coerce.number().min(0).max(100).default(10),
   acceptsOnline: z.boolean().default(true),
+  cnpj: z.string().trim().optional().refine((v) => !v || isValidCnpj(v), "CNPJ inválido. Confira os números."),
   isActive: z.boolean().default(true),
   serviceIds: z.array(z.string().uuid()).default([]),
   workingHours: z.record(z.string(), z.object({ open: z.string(), close: z.string() }).nullable()).default({}),
@@ -66,6 +68,7 @@ export async function saveProfessional(actor: Actor, id: string | null, raw: unk
     commissionPct: i.commissionPct.toFixed(2),
     productCommissionPct: i.productCommissionPct.toFixed(2),
     acceptsOnline: i.acceptsOnline,
+    ...(i.cnpj !== undefined ? { cnpj: normalizeCnpj(i.cnpj) || null } : {}),
     isActive: i.isActive,
     serviceIds: i.serviceIds,
     workingHours: i.workingHours as OpeningHours,

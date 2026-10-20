@@ -63,6 +63,7 @@ export const settingsSchema = z.object({
   address: z.string().trim().max(200).optional(),
   slotMinutes: z.coerce.number().int().min(5).max(60),
   onlineBooking: z.boolean(),
+  partnerMode: z.boolean().default(false),
   onlineBookingLeadMin: z.coerce.number().int().min(0).max(1440),
   reviewUrl: z.string().trim().url().optional().or(z.literal("")),
   messageProvider: z.enum(["MANUAL", "WA_CLOUD", "WA_QR"]),
@@ -102,6 +103,7 @@ export async function updateSettings(actor: Actor, raw: unknown) {
           addressJson: input.address ? { text: input.address } : null,
           slotMinutes: input.slotMinutes,
           onlineBooking: input.onlineBooking,
+          partnerMode: input.partnerMode,
           onlineBookingLeadMin: input.onlineBookingLeadMin,
           reviewUrl: input.reviewUrl || null,
           messageProvider: input.messageProvider,
@@ -132,5 +134,13 @@ export async function updateAutomation(actor: Actor, kind: string, patch: { enab
     if (!row) throw new DomainError("NOT_FOUND", "Automação não encontrada.");
     const settings = { ...(row.settings ?? {}), ...(patch.settings ?? {}) };
     await tx.update(automations).set({ enabled: patch.enabled, template: patch.template.trim(), settings, ...ctx.stampUpdate() }).where(eq(automations.id, row.id));
+  });
+}
+
+/** Regra de fidelidade ligada (a cada N visitas) ou null. Leitura simples para a ficha da cliente. */
+export async function loyaltyEvery(actor: Actor): Promise<number | null> {
+  return withTenantRead(actor, async (tx) => {
+    const [r] = await tx.select({ enabled: automations.enabled, settings: automations.settings }).from(automations).where(eq(automations.kind, "LOYALTY")).limit(1);
+    return r?.enabled ? Math.max(2, Number(r.settings.everyVisits ?? 10)) : null;
   });
 }

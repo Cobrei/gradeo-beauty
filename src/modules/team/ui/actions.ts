@@ -23,6 +23,7 @@ export async function saveProfessionalAction(_p: ActionResult<unknown> | null, f
       phone: fd.get("phone") || undefined,
       color: fd.get("color") || "#b8475f",
       commissionPct: fd.get("commissionPct") || 40,
+      cnpj: fd.has("cnpj") ? String(fd.get("cnpj") ?? "") : undefined,
       productCommissionPct: fd.get("productCommissionPct") || 10,
       acceptsOnline: on(fd.get("acceptsOnline")),
       isActive: fd.get("isActive") == null ? true : on(fd.get("isActive")),

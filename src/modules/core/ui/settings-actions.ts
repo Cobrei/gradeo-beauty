@@ -19,6 +19,7 @@ export async function saveSettingsAction(_p: ActionResult<unknown> | null, fd: F
       address: fd.get("address") || undefined,
       slotMinutes: fd.get("slotMinutes") || 15,
       onlineBooking: fd.get("onlineBooking") === "on",
+      partnerMode: fd.get("partnerMode") === "on",
       onlineBookingLeadMin: fd.get("onlineBookingLeadMin") || 60,
       reviewUrl: fd.get("reviewUrl") || "",
       messageProvider: fd.get("messageProvider") || "MANUAL",

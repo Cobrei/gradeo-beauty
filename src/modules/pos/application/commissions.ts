@@ -90,3 +90,15 @@ export async function markClosingPaid(actor: Actor, id: string) {
     await tx.update(commissionClosings).set({ status: "PAID", paidAt: new Date(), ...ctx.stampUpdate() }).where(eq(commissionClosings.id, id));
   });
 }
+
+/** Lei do Salão-Parceiro: cota-parte de cada profissional x do salão no período (base para a nota e o contador). */
+export async function partnerReport(actor: Actor, from: string, to: string) {
+  assertCan(actor, "commission.read_all");
+  const lines = await commissionReport(actor, from, to);
+  const pros = await withTenantRead(actor, (tx) => tx.select({ id: professionals.id, cnpj: professionals.cnpj }).from(professionals));
+  const cnpj = new Map(pros.map((p) => [p.id, p.cnpj]));
+  return lines.map((l) => {
+    const gross = l.services + l.products;
+    return { ...l, cnpj: cnpj.get(l.professionalId) ?? null, gross, partnerShare: l.commission, salonShare: gross - l.commission };
+  });
+}

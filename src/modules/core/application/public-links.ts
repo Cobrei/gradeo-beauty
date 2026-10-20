@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
-import { appointments, clients, orderItems, orders, payments, professionals, services } from "@/db/schema";
+import { appointments, clients, feedback, orderItems, orders, payments, professionals, services } from "@/db/schema";
 import { getPublicSalonById } from "./settings";
 
 const isToken = (t: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(t);
@@ -53,5 +53,30 @@ export async function confirmByToken(token: string): Promise<"ok" | "already" | 
   if (a.status === "CONFIRMED") return "already";
   if (a.status !== "SCHEDULED" || a.startsAt.getTime() < Date.now()) return "invalid";
   await db.update(appointments).set({ status: "CONFIRMED", confirmedAt: new Date(), updatedAt: new Date() }).where(and(eq(appointments.id, a.id), eq(appointments.status, "SCHEDULED")));
+  return "ok";
+}
+
+/** Pesquisa de satisfação: dados do atendimento + nota já dada (se houver). */
+export async function feedbackByToken(token: string) {
+  const data = await appointmentByToken(token);
+  if (!data) return null;
+  const [f] = await db.select({ score: feedback.score, comment: feedback.comment }).from(feedback).where(and(eq(feedback.tenantId, data.appt.tenantId), eq(feedback.appointmentId, data.appt.id))).limit(1);
+  const ageDays = (Date.now() - data.appt.endsAt.getTime()) / 86400000;
+  return { ...data, given: f ?? null, open: data.appt.status === "DONE" && ageDays <= 30 };
+}
+
+/** Grava (ou corrige) a nota de 1 a 5 e o comentário opcional. Só para atendimento realizado, até 30 dias. */
+export async function saveFeedbackByToken(token: string, score: number | null, comment: string | null): Promise<"ok" | "invalid"> {
+  if (!isToken(token)) return "invalid";
+  const [a] = await db.select({ id: appointments.id, tenantId: appointments.tenantId, status: appointments.status, endsAt: appointments.endsAt, clientId: appointments.clientId, professionalId: appointments.professionalId }).from(appointments).where(and(eq(appointments.publicToken, token), isNull(appointments.deletedAt))).limit(1);
+  if (!a || a.status !== "DONE" || Date.now() - a.endsAt.getTime() > 30 * 86400000) return "invalid";
+  const text = comment?.trim().slice(0, 1000) || null;
+  const [prev] = await db.select({ id: feedback.id }).from(feedback).where(and(eq(feedback.tenantId, a.tenantId), eq(feedback.appointmentId, a.id))).limit(1);
+  if (prev) {
+    await db.update(feedback).set({ ...(score ? { score, handledAt: null } : {}), ...(text !== null ? { comment: text } : {}), updatedAt: new Date() }).where(eq(feedback.id, prev.id));
+  } else {
+    if (!score) return "invalid";
+    await db.insert(feedback).values({ tenantId: a.tenantId, appointmentId: a.id, clientId: a.clientId, professionalId: a.professionalId, score, comment: text });
+  }
   return "ok";
 }

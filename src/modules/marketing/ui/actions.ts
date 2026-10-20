@@ -113,7 +113,7 @@ export async function saveAutomationAction(_p: ActionResult<unknown> | null, fd:
   try {
     const actor = await requireActor();
     const settings: Record<string, unknown> = {};
-    for (const k of ["hoursBefore", "hoursAfter", "inactiveDays", "voucherValue", "voucherDays"]) if (fd.get(k)) settings[k] = k === "voucherValue" ? parseReais(fd.get(k)) : Number(fd.get(k));
+    for (const k of ["hoursBefore", "hoursAfter", "inactiveDays", "everyVisits", "voucherValue", "voucherDays"]) if (fd.get(k)) settings[k] = k === "voucherValue" ? parseReais(fd.get(k)) : Number(fd.get(k));
     if (fd.get("voucherKind")) settings.voucherKind = String(fd.get("voucherKind"));
     await updateAutomation(actor, String(fd.get("kind")), { enabled: fd.get("enabled") === "on", template: String(fd.get("template") || ""), settings });
   } catch (e) {

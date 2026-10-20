@@ -1,4 +1,4 @@
-import { date, index, integer, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { date, index, integer, numeric, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { baseCols } from "./_common";
 
 /**
@@ -66,4 +66,19 @@ export const waitlist = pgTable(
     notifiedAt: timestamp("notified_at", { withTimezone: true }),
   },
   (t) => [index("ix_waitlist_tenant").on(t.tenantId, t.status)],
+);
+
+/** Pesquisa de satisfação: uma nota (1 a 5) por atendimento, dada pela cliente no link público. */
+export const feedback = pgTable(
+  "agd_feedback",
+  {
+    ...baseCols,
+    appointmentId: uuid("appointment_id").notNull(),
+    clientId: uuid("client_id"),
+    professionalId: uuid("professional_id"),
+    score: integer("score").notNull(),
+    comment: text("comment"),
+    handledAt: timestamp("handled_at", { withTimezone: true }),
+  },
+  (t) => [uniqueIndex("uq_feedback_appt").on(t.tenantId, t.appointmentId), index("ix_feedback_tenant").on(t.tenantId, t.createdAt)],
 );

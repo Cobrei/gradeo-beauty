@@ -48,6 +48,7 @@ export const FEATURES: FeatureRow[] = [
   { label: "Estoque com baixa automática na venda", basic: true, pro: true, mega: true },
   { label: "Pacotes com créditos de sessão", basic: true, pro: true, mega: true },
   { label: "Comissões por serviço e produto, com fechamento", basic: false, pro: true, mega: true },
+  { label: "Relatório do salão-parceiro (cota-parte e CNPJ para o contador), opcional", basic: false, pro: true, mega: true },
 
   { group: "Clientes", label: "Ficha com histórico, ritmo e previsão de retorno", basic: true, pro: true, mega: true },
   { label: "Ficha técnica: fórmula, alergia, preferência", basic: true, pro: true, mega: true },
@@ -57,6 +58,8 @@ export const FEATURES: FeatureRow[] = [
   { group: "Marketing e WhatsApp", label: "Mensagens em um toque pelo seu WhatsApp", basic: true, pro: true, mega: true },
   { label: "Lembrete de horário e aniversário (fila pronta)", basic: true, pro: true, mega: true },
   { label: "Agradecimento, convite de retorno e resgate de sumidas", basic: false, pro: true, mega: true },
+  { label: "Pesquisa de satisfação com convite para avaliar no Google, opcional", basic: true, pro: true, mega: true },
+  { label: "Fidelidade: presente a cada X visitas, opcional", basic: false, pro: true, mega: true },
   { label: "Campanhas prontas", basic: "2 modelos", pro: "8 modelos", mega: "8 modelos" },
   { label: "Voucher pessoal de uso único", basic: false, pro: true, mega: true },
   { label: "Medição de quem voltou e da receita da campanha", basic: false, pro: true, mega: true },

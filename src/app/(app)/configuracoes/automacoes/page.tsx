@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Badge, Card, Field, Notice, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
-import { listAutomations } from "@/modules/core/application/settings";
+import { getSettings, listAutomations } from "@/modules/core/application/settings";
 import { saveAutomationAction } from "@/modules/marketing/ui/actions";
 import { DEFAULT_AUTOMATIONS } from "@/modules/catalog/domain/presets";
 import { formatDateTime } from "@/lib/time";
@@ -12,7 +12,7 @@ export const metadata = { title: "Automações" };
 export default async function AutomacoesPage({ searchParams }: { searchParams: Promise<{ salvo?: string }> }) {
   const actor = await requireActor();
   const sp = await searchParams;
-  const rows = await listAutomations(actor);
+  const [rows, settings] = await Promise.all([listAutomations(actor), getSettings(actor)]);
   const order = DEFAULT_AUTOMATIONS.map((d) => d.kind);
   rows.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
   return (
@@ -27,15 +27,18 @@ export default async function AutomacoesPage({ searchParams }: { searchParams: P
             <Card key={a.id} title={def?.label ?? a.kind} action={<Badge tone={a.enabled ? "ok" : "mist"}>{a.enabled ? "ligada" : "desligada"}</Badge>}>
               <Form action={saveAutomationAction} submitLabel="Salvar">
                 <input type="hidden" name="kind" value={a.kind} />
+                {a.kind === "SURVEY" && <p className="rounded-lg bg-mist p-3 text-xs text-ink-2">Opcional. A cliente recebe um link e dá uma nota de 1 a 5. Quem dá 4 ou 5 é convidada a avaliar o salão no Google{settings.reviewUrl ? "" : " (cadastre o link de avaliação do Google em Configurações)"}; notas de 1 a 3 aparecem no Início para você resolver. Quando ligada, substitui o agradecimento simples (a cliente recebe uma mensagem só).</p>}
+                {a.kind === "LOYALTY" && <p className="rounded-lg bg-mist p-3 text-xs text-ink-2">Opcional. A cada X visitas pagas, a cliente ganha um voucher pessoal de uso único. O progresso aparece na ficha dela.</p>}
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={a.enabled} className="h-4 w-4 accent-[#b8475f]" /> Ativa</label>
-                <Field label="Mensagem" name="template" hint="Variáveis: {nome} {salao} {hora} {data} {servico} {profissional} {voucher} {validade} {link} {confirmar} (link para a cliente confirmar o horário)">
+                <Field label="Mensagem" name="template" hint="Variáveis: {nome} {salao} {hora} {data} {servico} {profissional} {voucher} {validade} {link} {confirmar} (link para confirmar o horário) {avaliar} (link da pesquisa) {visitas}">
                   <textarea id={`t_${a.kind}`} name="template" rows={3} className="field" defaultValue={a.template} />
                 </Field>
                 <div className="grid grid-cols-3 gap-2">
                   {a.kind === "REMINDER_24H" && <Field label="Horas antes" name="hoursBefore"><input name="hoursBefore" type="number" className="field" defaultValue={Number(st.hoursBefore ?? 24)} /></Field>}
-                  {a.kind === "THANKS" && <Field label="Horas depois" name="hoursAfter"><input name="hoursAfter" type="number" className="field" defaultValue={Number(st.hoursAfter ?? 2)} /></Field>}
+                  {(a.kind === "THANKS" || a.kind === "SURVEY") && <Field label="Horas depois" name="hoursAfter"><input name="hoursAfter" type="number" className="field" defaultValue={Number(st.hoursAfter ?? 2)} /></Field>}
                   {a.kind === "WIN_BACK" && <Field label="Dias sem vir" name="inactiveDays"><input name="inactiveDays" type="number" className="field" defaultValue={Number(st.inactiveDays ?? 60)} /></Field>}
-                  {(a.kind === "BIRTHDAY" || a.kind === "WIN_BACK") && (
+                  {a.kind === "LOYALTY" && <Field label="A cada quantas visitas" name="everyVisits"><input name="everyVisits" type="number" min={2} className="field" defaultValue={Number(st.everyVisits ?? 10)} /></Field>}
+                  {(a.kind === "BIRTHDAY" || a.kind === "WIN_BACK" || a.kind === "LOYALTY") && (
                     <>
                       <Field label="Voucher" name="voucherKind"><select name="voucherKind" className="field" defaultValue={String(st.voucherKind ?? "PERCENT")}><option value="PERCENT">%</option><option value="AMOUNT">R$</option></select></Field>
                       <Field label="Valor" name="voucherValue"><input name="voucherValue" inputMode="decimal" className="field" defaultValue={Number(st.voucherValue ?? 15)} /></Field>

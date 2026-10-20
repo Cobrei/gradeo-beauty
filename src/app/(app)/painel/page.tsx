@@ -12,6 +12,8 @@ import { formatLongDate, localTime } from "@/lib/time";
 import { APPT_STATUS } from "@/modules/agenda/domain/slots";
 import { formatPhone } from "@/lib/phone";
 import { ModuleGrid } from "@/components/ui/modules";
+import { pendingLowFeedback } from "@/modules/reports/application/feedback";
+import { markFeedbackHandledAction } from "@/modules/reports/ui/feedback-actions";
 
 export const metadata = { title: "Início" };
 
@@ -22,7 +24,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
   const [d, settings] = await Promise.all([dashboard(actor), getSettings(actor)]);
   const canAgenda = can(actor, "agenda.appointment.read") || can(actor, "agenda.appointment.read_own");
   const canCrm = can(actor, "crm.client.read");
-  const [agenda, segments, bdays] = await Promise.all([canAgenda ? dayAgenda(actor, today) : null, canCrm ? segmentSummary(actor) : [], canCrm ? upcomingBirthdays(actor, 7) : []]);
+  const [agenda, segments, bdays, lowFeedback] = await Promise.all([canAgenda ? dayAgenda(actor, today) : null, canCrm ? segmentSummary(actor) : [], canCrm ? upcomingBirthdays(actor, 7) : [], canCrm ? pendingLowFeedback(actor) : []]);
   const inactive = segments.find((s) => s.key === "INACTIVE");
   const overdue = segments.find((s) => s.key === "OVERDUE_CYCLE");
   const bookingUrl = `/agendar/${settings.slug}`;
@@ -106,6 +108,26 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
           </Card>
         )}
         <div className="space-y-4">
+          {lowFeedback.length > 0 && (
+            <Card title="Avaliações para olhar" className="border border-warn/30">
+              <ul className="space-y-3">
+                {lowFeedback.map((f) => (
+                  <li key={f.id} className="text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-bold text-warn">Nota {f.score}</span> ·{" "}
+                        {f.clientId ? <Link href={`/clientes/${f.clientId}`} className="font-semibold hover:underline">{f.client}</Link> : "Cliente"}
+                        <div className="text-xs text-muted">{f.service} · {f.pro}</div>
+                        {f.comment && <p className="mt-1 text-ink-2">“{f.comment}”</p>}
+                      </div>
+                      <form action={markFeedbackHandledAction}><input type="hidden" name="id" value={f.id} /><button className="btn btn-ghost btn-sm">Resolvido</button></form>
+                    </div>
+                    {f.phone && <div className="mt-1"><WaLink phone={f.phone} text={`Oi, ${(f.client ?? "").split(" ")[0]}! Aqui é do ${settings.salonName}. Vi sua avaliação e quero entender o que aconteceu para resolver com você.`}>Falar com ela</WaLink></div>}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
           {canCrm && (
             <Card title="Aniversários da semana">
               {bdays.length === 0 ? (

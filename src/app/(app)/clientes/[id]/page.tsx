@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar, Badge, Card, Field, LinkButton, PageHeader, Stat, Tabs, WaLink } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
-import { getSettings } from "@/modules/core/application/settings";
+import { getSettings, loyaltyEvery } from "@/modules/core/application/settings";
 import { getClient } from "@/modules/crm/application/use-cases";
 import { nextAppointments } from "@/modules/agenda/application/use-cases";
 import { listProfessionals } from "@/modules/team/application/use-cases";
@@ -31,7 +31,7 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
   const { id } = await params;
   const { aba = "historico" } = await searchParams;
   const actor = await requireActor();
-  const [data, settings, next, pros, services] = await Promise.all([getClient(actor, id), getSettings(actor), nextAppointments(actor, id), listProfessionals(actor), listServices(actor)]);
+  const [data, settings, next, pros, services, loyalty] = await Promise.all([getClient(actor, id), getSettings(actor), nextAppointments(actor, id), listProfessionals(actor), listServices(actor), loyaltyEvery(actor)]);
   const c = data.client;
   const today = todayISO();
   const days = c.lastVisitAt ? daysBetween(c.lastVisitAt, today) : null;
@@ -68,7 +68,7 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
         </div>
       )}
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Stat label="Visitas" value={c.visitsCount} tone="info" />
+        <Stat label="Visitas" value={c.visitsCount} tone="info" hint={loyalty ? `fidelidade: ${c.visitsCount % loyalty}/${loyalty} para o presente` : undefined} />
         <Stat label="Total gasto" value={formatBRL(toCents(c.totalSpent))} tone="ok" />
         <Stat label="Ticket médio" value={c.visitsCount ? formatBRL(Math.round(toCents(c.totalSpent) / c.visitsCount)) : "—"} tone="gold" />
         <Stat label="Última visita" value={c.lastVisitAt ? `${days} d` : "—"} hint={c.lastVisitAt ? formatBR(c.lastVisitAt) : "ainda não veio"} tone={days !== null && days > 45 ? "bad" : "mist"} />

@@ -9,6 +9,8 @@ import { SYSTEM_ROLES } from "@/lib/permissions";
 import { WEEKDAYS } from "@/lib/time";
 import { can, assertCan } from "@/lib/context";
 import { formatPhone } from "@/lib/phone";
+import { formatCnpj } from "@/lib/cnpj";
+import { getSettings } from "@/modules/core/application/settings";
 
 export const metadata = { title: "Equipe" };
 
@@ -16,7 +18,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
   const actor = await requireActor();
   assertCan(actor, "team.professional.manage");
   const sp = await searchParams;
-  const [pros, services] = await Promise.all([listProfessionals(actor, { includeInactive: true }), listServices(actor)]);
+  const [pros, services, settings] = await Promise.all([listProfessionals(actor, { includeInactive: true }), listServices(actor), getSettings(actor)]);
   const editing = sp.editar ? await getProfessional(actor, sp.editar) : undefined;
   const showForm = !!editing || sp.novo === "1";
   const custom = editing ? Object.keys(editing.workingHours).length > 0 : false;
@@ -32,7 +34,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
                   <Avatar name={p.name} color={p.color} />
                   <div className="min-w-0 flex-1">
                     <Link href={`/equipe?editar=${p.id}`} className="font-semibold hover:underline">{p.name}</Link>{p.nickname && <span className="text-muted"> ({p.nickname})</span>}
-                    <div className="text-xs text-muted">{formatPhone(p.phone)} · comissão {Number(p.commissionPct)}% serviços / {Number(p.productCommissionPct)}% produtos{p.userId ? " · tem acesso" : ""}{!p.acceptsOnline ? " · fora do online" : ""}</div>
+                    <div className="text-xs text-muted">{formatPhone(p.phone)} · comissão {Number(p.commissionPct)}% serviços / {Number(p.productCommissionPct)}% produtos{p.userId ? " · tem acesso" : ""}{!p.acceptsOnline ? " · fora do online" : ""}{settings.partnerMode ? (p.cnpj ? ` · CNPJ ${formatCnpj(p.cnpj)}` : " · sem CNPJ") : ""}</div>
                   </div>
                   {!p.isActive && <Badge tone="mist">inativa</Badge>}
                 </li>
@@ -49,7 +51,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
                 <Field label="Apelido (agenda)" name="nickname"><input id="nickname" name="nickname" className="field" defaultValue={editing?.nickname ?? ""} /></Field>
                 <Field label="WhatsApp" name="phone"><input id="phone" name="phone" className="field" defaultValue={editing?.phone ? formatPhone(editing.phone) : ""} /></Field>
                 <Field label="Cor na agenda" name="color"><input id="color" name="color" type="color" className="field h-12 p-1" defaultValue={editing?.color ?? "#b8475f"} /></Field>
-                <div />
+                {settings.partnerMode ? <Field label="CNPJ (profissional parceiro)" name="cnpj" hint="MEI ou ME. Vai no relatório do salão-parceiro."><input id="cnpj" name="cnpj" inputMode="numeric" className="field" defaultValue={formatCnpj(editing?.cnpj)} placeholder="00.000.000/0000-00" /></Field> : <div />}
                 <Field label="Comissão serviços %" name="commissionPct"><input id="commissionPct" name="commissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing ? Number(editing.commissionPct) : 40} /></Field>
                 <Field label="Comissão produtos %" name="productCommissionPct"><input id="productCommissionPct" name="productCommissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing ? Number(editing.productCommissionPct) : 10} /></Field>
               </div>

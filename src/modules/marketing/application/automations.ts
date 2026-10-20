@@ -66,6 +66,9 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
   if (!s || !t) return out;
   const ctx: Ctx = { actor, salonName: t.name, slug: s.slug, reviewUrl: s.reviewUrl, providerKind: s.messageProvider, wa: s, sent: 0 };
   const rules = await withTenantRead(actor, (tx) => tx.select().from(automations).where(eq(automations.enabled, true)));
+  // A pesquisa de satisfação substitui o agradecimento simples (as duas usam o mesmo marcador e não duplicam)
+  const surveyOn = rules.some((r) => r.kind === "SURVEY");
+  rules.sort((a, b) => Number(b.kind === "SURVEY") - Number(a.kind === "SURVEY"));
   const now = new Date();
   const today = todayISO();
   const link = appUrl(`/agendar/${s.slug}`);
@@ -93,20 +96,24 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
         n++;
       }
     }
-    if (rule.kind === "THANKS") {
+    if (rule.kind === "THANKS" || rule.kind === "SURVEY") {
+      if (rule.kind === "THANKS" && surveyOn) {
+        out[rule.kind] = 0;
+        continue;
+      }
       const hours = Number(rule.settings.hoursAfter ?? 2);
       const before = new Date(now.getTime() - hours * 3600000);
       const floor = new Date(now.getTime() - 48 * 3600000);
       const rows = await withTenantRead(actor, (tx) =>
         tx
-          .select({ id: appointments.id, clientId: appointments.clientId, phone: clients.phone, name: clients.fullName, service: services.name })
+          .select({ id: appointments.id, token: appointments.publicToken, clientId: appointments.clientId, phone: clients.phone, name: clients.fullName, service: services.name })
           .from(appointments)
           .innerJoin(clients, eq(clients.id, appointments.clientId))
           .innerJoin(services, eq(services.id, appointments.serviceId))
           .where(and(eq(appointments.status, "DONE"), lte(appointments.endsAt, before), gte(appointments.endsAt, floor), isNull(appointments.thanksSentAt), isNotNull(clients.phone))),
       );
       for (const r of rows) {
-        await enqueue(ctx, rule.kind, r.clientId!, r.phone!, renderTemplate(rule.template, { nome: r.name, salao: ctx.salonName, servico: r.service, link: ctx.reviewUrl ?? link }), { appointmentId: r.id });
+        await enqueue(ctx, rule.kind, r.clientId!, r.phone!, renderTemplate(rule.template, { nome: r.name, salao: ctx.salonName, servico: r.service, link: ctx.reviewUrl ?? link, avaliar: appUrl(`/avaliar/${r.token}`) }), { appointmentId: r.id });
         await withTenantTx(actor, (tx) => tx.update(appointments).set({ thanksSentAt: now }).where(eq(appointments.id, r.id)));
         n++;
       }
@@ -130,6 +137,34 @@ export async function runAutomationsForTenant(tenantId: string): Promise<Record<
       );
       for (const r of rows) {
         await enqueue(ctx, rule.kind, r.client_id, r.phone, renderTemplate(rule.template, { nome: r.name, salao: ctx.salonName, servico: r.service, link }));
+        n++;
+      }
+    }
+    if (rule.kind === "LOYALTY") {
+      // Presente a cada N visitas: quem fechou a N-ésima (2N-ésima…) visita nos últimos 30 dias e ainda não ganhou por ela.
+      const every = Math.max(2, Number(rule.settings.everyVisits ?? 10));
+      const rows = await withTenantRead(actor, (tx) =>
+        tx.execute<{ id: string; name: string; phone: string; visits: number }>(sql`
+          select c.id, c.full_name as name, c.phone, c.visits_count as visits
+          from crm_clients c
+          where c.deleted_at is null and c.phone is not null and c.marketing_opt_out is null
+            and c.visits_count >= ${every} and c.visits_count % ${every} = 0
+            and c.last_visit_at >= (${today}::date - 30)
+            and not exists (select 1 from mkt_messages m where m.client_id = c.id and m.automation_kind = 'LOYALTY' and m.created_at::date >= c.last_visit_at)
+          limit 200`),
+      );
+      const vk = (rule.settings.voucherKind as "PERCENT" | "AMOUNT" | undefined) ?? "PERCENT";
+      const vv = Number(rule.settings.voucherValue ?? 20);
+      const vd = Number(rule.settings.voucherDays ?? 60);
+      for (const r of rows) {
+        const validUntil = addDays(today, vd);
+        const code = voucherCode("FIEL");
+        const voucherId = await withTenantTx(actor, async (tx, t) => {
+          const [v] = await tx.insert(vouchers).values({ ...t.stampCreate(), code, name: `Fidelidade (${r.visits} visitas)`, clientId: r.id, kind: vk, value: vk === "PERCENT" ? String(vv) : vv.toFixed(4), validFrom: today, validUntil, maxUses: 1 }).returning({ id: vouchers.id });
+          return v.id;
+        });
+        const voucherText = `${voucherLabel(vk, vk === "PERCENT" ? vv : Math.round(vv * 100))} (código ${code})`;
+        await enqueue(ctx, rule.kind, r.id, r.phone, renderTemplate(rule.template, { nome: r.name, salao: ctx.salonName, visitas: String(r.visits), voucher: voucherText, validade: formatBRDate(validUntil), link }), { voucherId });
         n++;
       }
     }
