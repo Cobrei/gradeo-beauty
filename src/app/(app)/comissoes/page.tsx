@@ -63,7 +63,7 @@ export default async function ComissoesPage({ searchParams }: { searchParams: Pr
               </table>
             </Card>
           )}
-          <p className="mt-3 text-xs text-muted">Pela Lei 13.352/2016, o salão-parceiro pode tributar só a cota-parte dele; o repasse ao profissional (MEI ou ME) vai nas deduções da nota. Exige contrato de parceria homologado. Confira as regras do seu município com o contador. Valores das comandas pagas, antes de ajustes de fechamento.</p>
+          <p className="mt-3 text-xs text-muted">Pela Lei 13.352/2016, o salão-parceiro pode tributar só a cota-parte dele; o repasse ao profissional (MEI ou ME) vai nas deduções da nota. Exige contrato de parceria homologado. Confira as regras do seu município com o contador. Valores das comandas pagas, antes de ajustes de fechamento. <Link href="/lei-salao-parceiro" target="_blank" className="font-semibold text-brand underline">Entenda a Lei do Salão-Parceiro</Link></p>
         </>
       )}
       {aba === "periodo" && (

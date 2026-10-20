@@ -60,7 +60,7 @@ export default async function ConfigPage({ searchParams }: { searchParams: Promi
         </Card>
         <Card title="Recursos opcionais" className="mb-4">
           <div className="space-y-3 text-sm">
-            <label className="flex items-start gap-2"><input type="checkbox" name="partnerMode" defaultChecked={s.partnerMode} className="mt-0.5 h-4 w-4 accent-[#b8475f]" /><span><b>Trabalho com profissionais parceiros (Lei do Salão-Parceiro)</b><br /><span className="text-muted">Mostra o CNPJ de cada profissional na Equipe e o relatório de cota-parte em Comissões, para o contador.</span></span></label>
+            <label className="flex items-start gap-2"><input type="checkbox" name="partnerMode" defaultChecked={s.partnerMode} className="mt-0.5 h-4 w-4 accent-[#b8475f]" /><span><b>Trabalho com profissionais parceiros (Lei do Salão-Parceiro)</b><br /><span className="text-muted">Mostra o CNPJ de cada profissional na Equipe e o relatório de cota-parte em Comissões, para o contador. <Link href="/lei-salao-parceiro" target="_blank" className="font-semibold text-brand underline">O que é a lei?</Link></span></span></label>
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
               <span><b>Pesquisa de satisfação</b> e <b>Fidelidade</b><br /><span className="text-muted">Ligue ou desligue em Automações.</span></span>
               <Link href="/configuracoes/automacoes" className="btn btn-secondary btn-sm">Abrir Automações</Link>

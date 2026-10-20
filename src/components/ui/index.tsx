@@ -80,7 +80,7 @@ export function EmptyState({ title, hint, action }: { title: string; hint?: stri
   );
 }
 
-export function Field({ label, name, children, errorKey, hint, className = "" }: { label: string; name: string; children: ReactNode; errorKey?: string; hint?: string; className?: string }) {
+export function Field({ label, name, children, errorKey, hint, className = "" }: { label: string; name: string; children: ReactNode; errorKey?: string; hint?: ReactNode; className?: string }) {
   return (
     <div className={className}>
       <label htmlFor={name} className="label">
