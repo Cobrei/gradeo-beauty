@@ -13,7 +13,7 @@ export async function loginAction(_prev: ActionResult<unknown> | null, formData:
   const h = await headers();
   const r = await login(email, password, h.get("user-agent") ?? undefined);
   if (!r.ok) return { ok: false, code: "AUTH", message: r.message };
-  redirect("/");
+  redirect("/painel");
 }
 
 export async function logoutAction() {
@@ -40,5 +40,5 @@ export async function signupAction(_prev: ActionResult<unknown> | null, formData
   } catch (e) {
     return toActionError(e);
   }
-  redirect("/?bemvinda=1");
+  redirect("/painel?bemvinda=1");
 }
