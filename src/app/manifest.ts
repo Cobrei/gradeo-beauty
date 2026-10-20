@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: BRAND.name,
     short_name: BRAND.name,
     description: BRAND.tagline,
-    start_url: "/",
+    start_url: "/painel",
     display: "standalone",
     background_color: "#fcfafb",
     theme_color: "#231a29",
