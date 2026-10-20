@@ -1,4 +1,5 @@
 import { Card, Field, PageHeader } from "@/components/ui";
+import { DiscountFields } from "@/components/ui/percent-input";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
 import { getSettings } from "@/modules/core/application/settings";
@@ -58,14 +59,7 @@ export default async function NovaCampanha({ searchParams }: { searchParams: Pro
           </Card>
           <Card title="3. Voucher (opcional)">
             <div className="grid grid-cols-3 gap-2">
-              <Field label="Tipo" name="voucherKind">
-                <select id="voucherKind" name="voucherKind" className="field" defaultValue={tpl?.voucher?.kind ?? ""}>
-                  <option value="">Sem voucher</option>
-                  <option value="PERCENT">% de desconto</option>
-                  <option value="AMOUNT">R$ de desconto</option>
-                </select>
-              </Field>
-              <Field label="Valor" name="voucherValue"><input id="voucherValue" name="voucherValue" inputMode="decimal" className="field" defaultValue={tpl?.voucher?.value ?? ""} /></Field>
+              <DiscountFields kindName="voucherKind" valueName="voucherValue" allowNone defaultKind={tpl?.voucher?.kind ?? ""} defaultValue={tpl?.voucher?.value ?? ""} />
               <Field label="Validade (dias)" name="voucherDays"><input id="voucherDays" name="voucherDays" type="number" className="field" defaultValue={tpl?.voucher?.days ?? 15} /></Field>
             </div>
             <Field label="Só para um serviço" name="voucherServiceId"><select id="voucherServiceId" name="voucherServiceId" className="field" defaultValue=""><option value="">Qualquer serviço</option>{services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>

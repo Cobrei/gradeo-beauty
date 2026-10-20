@@ -1,4 +1,5 @@
 import { MoneyInput } from "@/components/ui/money-input";
+import { PercentInput } from "@/components/ui/percent-input";
 import { assertCan } from "@/lib/context";
 import Link from "next/link";
 import { Badge, Card, EmptyState, Field, LinkButton, PageHeader } from "@/components/ui";
@@ -79,7 +80,7 @@ export default async function ServicosPage({ searchParams }: { searchParams: Pro
                 <Field label="Duração (min)" name="durationMin"><input id="durationMin" name="durationMin" type="number" min={5} step={5} className="field" required defaultValue={editing?.durationMin ?? 60} /></Field>
                 <Field label="Preço" name="price"><MoneyInput name="price" required defaultValue={editing ? editing.price : null} /></Field>
                 <Field label="Custo de insumo" name="cost"><MoneyInput name="cost" defaultValue={editing ? editing.cost : 0} /></Field>
-                <Field label="Comissão % (vazio = da profissional)" name="commissionPct"><input id="commissionPct" name="commissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing?.commissionPct != null ? Number(editing.commissionPct) : ""} /></Field>
+                <Field label="Comissão (%) — vazio = da profissional" name="commissionPct"><PercentInput name="commissionPct" placeholder="Ex.: 40%" defaultValue={editing?.commissionPct != null ? Number(editing.commissionPct) : ""} /></Field>
                 <Field label="Ciclo de retorno (dias)" name="returnIntervalDays" hint="Usado para lembrar a cliente de voltar."><input id="returnIntervalDays" name="returnIntervalDays" type="number" min={1} className="field" defaultValue={editing?.returnIntervalDays ?? ""} /></Field>
               </div>
               <Field label="Descrição (aparece no agendamento online)" name="description"><textarea id="description" name="description" rows={2} className="field" defaultValue={editing?.description ?? ""} /></Field>

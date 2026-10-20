@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DiscountFields } from "@/components/ui/percent-input";
 import { Badge, Card, Field, Notice, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
@@ -40,8 +41,7 @@ export default async function AutomacoesPage({ searchParams }: { searchParams: P
                   {a.kind === "LOYALTY" && <Field label="A cada quantas visitas" name="everyVisits"><input name="everyVisits" type="number" min={2} className="field" defaultValue={Number(st.everyVisits ?? 10)} /></Field>}
                   {(a.kind === "BIRTHDAY" || a.kind === "WIN_BACK" || a.kind === "LOYALTY") && (
                     <>
-                      <Field label="Voucher" name="voucherKind"><select name="voucherKind" className="field" defaultValue={String(st.voucherKind ?? "PERCENT")}><option value="PERCENT">%</option><option value="AMOUNT">R$</option></select></Field>
-                      <Field label="Valor" name="voucherValue"><input name="voucherValue" inputMode="decimal" className="field" defaultValue={Number(st.voucherValue ?? 15)} /></Field>
+                      <DiscountFields kindName="voucherKind" valueName="voucherValue" defaultKind={String(st.voucherKind ?? "PERCENT")} defaultValue={Number(st.voucherValue ?? 15)} />
                       <Field label="Validade (dias)" name="voucherDays"><input name="voucherDays" type="number" className="field" defaultValue={Number(st.voucherDays ?? 30)} /></Field>
                     </>
                   )}

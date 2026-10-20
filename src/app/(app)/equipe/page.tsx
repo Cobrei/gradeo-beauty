@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PercentInput } from "@/components/ui/percent-input";
 import { CopyHoursButton } from "@/components/ui/copy-hours";
 import { Avatar, Badge, Card, Field, LinkButton, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
@@ -54,8 +55,8 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
                 <Field label="WhatsApp" name="phone"><input id="phone" name="phone" className="field" defaultValue={editing?.phone ? formatPhone(editing.phone) : ""} /></Field>
                 <Field label="Cor na agenda" name="color"><input id="color" name="color" type="color" className="field h-12 p-1" defaultValue={editing?.color ?? "#b8475f"} /></Field>
                 {settings.partnerMode ? <Field label="CNPJ (profissional parceiro)" name="cnpj" hint={<>MEI ou ME. Vai no relatório do salão-parceiro. <Link href="/lei-salao-parceiro" target="_blank" className="underline">O que é?</Link></>}><input id="cnpj" name="cnpj" inputMode="numeric" className="field" defaultValue={formatCnpj(editing?.cnpj)} placeholder="00.000.000/0000-00" /></Field> : <div />}
-                <Field label="Comissão serviços %" name="commissionPct"><input id="commissionPct" name="commissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing ? Number(editing.commissionPct) : 40} /></Field>
-                <Field label="Comissão produtos %" name="productCommissionPct"><input id="productCommissionPct" name="productCommissionPct" type="number" min={0} max={100} step="0.5" className="field" defaultValue={editing ? Number(editing.productCommissionPct) : 10} /></Field>
+                <Field label="Comissão serviços (%)" name="commissionPct"><PercentInput name="commissionPct" defaultValue={editing ? Number(editing.commissionPct) : 40} /></Field>
+                <Field label="Comissão produtos (%)" name="productCommissionPct"><PercentInput name="productCommissionPct" defaultValue={editing ? Number(editing.productCommissionPct) : 10} /></Field>
               </div>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="acceptsOnline" defaultChecked={editing?.acceptsOnline ?? true} className="h-4 w-4 accent-brand" /> Aparece no agendamento online</label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" defaultChecked={editing?.isActive ?? true} className="h-4 w-4 accent-brand" /> Ativa</label>

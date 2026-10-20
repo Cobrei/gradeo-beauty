@@ -1,4 +1,5 @@
 import { MoneyInput } from "@/components/ui/money-input";
+import { DiscountFields } from "@/components/ui/percent-input";
 import { Badge, Card, EmptyState, Field, PageHeader } from "@/components/ui";
 import { Form } from "@/components/ui/form";
 import { requireActor } from "@/modules/core/application/auth";
@@ -59,8 +60,7 @@ export default async function VouchersPage() {
             <Field label="Nome" name="name"><input id="name" name="name" className="field" required placeholder="Ex.: Instagram outubro" /></Field>
             <Field label="Código (vazio = gera)" name="code"><input id="code" name="code" className="field uppercase" placeholder="BEMVINDA10" /></Field>
             <div className="grid grid-cols-2 gap-2">
-              <Field label="Tipo" name="kind"><select id="kind" name="kind" className="field"><option value="PERCENT">% desconto</option><option value="AMOUNT">R$ desconto</option></select></Field>
-              <Field label="Valor" name="value"><input id="value" name="value" inputMode="decimal" className="field" required /></Field>
+              <DiscountFields kindName="kind" valueName="value" required />
               <Field label="Pedido mínimo" name="minOrder"><MoneyInput name="minOrder" defaultValue={0} /></Field>
               <Field label="Limite de usos" name="maxUses"><input id="maxUses" name="maxUses" type="number" className="field" defaultValue={100} /></Field>
               <Field label="De" name="validFrom"><input id="validFrom" name="validFrom" type="date" className="field" defaultValue={today} /></Field>

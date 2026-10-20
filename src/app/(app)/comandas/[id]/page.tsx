@@ -230,7 +230,7 @@ export default async function ComandaPage({ params, searchParams }: { params: Pr
                   <Form action={discountAction} submitLabel="Aplicar">
                     <input type="hidden" name="orderId" value={ord.id} />
                     <div className="grid grid-cols-2 gap-2">
-                      <Field label="Valor" name="amount"><MoneyInput name="amount" defaultValue={ord.discount} /></Field>
+                      <Field label="Desconto (R$)" name="amount"><MoneyInput name="amount" defaultValue={ord.discount} /></Field>
                       <Field label="Motivo" name="reason"><input id="reason" name="reason" className="field" defaultValue={ord.discountReason ?? ""} /></Field>
                     </div>
                   </Form>
