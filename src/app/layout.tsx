@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { BRAND } from "@/config/brand";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: { default: BRAND.name, template: `%s · ${BRAND.name}` },
@@ -19,7 +20,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className="min-h-dvh antialiased">{children}</body>
+      <body className="min-h-dvh antialiased">{children}<Analytics /></body>
     </html>
   );
 }
