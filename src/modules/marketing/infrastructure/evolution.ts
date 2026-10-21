@@ -37,8 +37,21 @@ async function call<T = unknown>(method: string, path: string, body?: unknown): 
 type QrPayload = { base64?: string; code?: string; pairingCode?: string; qrcode?: { base64?: string; code?: string } };
 
 /** Cria a instância do salão (se ainda não existir) e devolve o QR code, quando vier junto. */
+/** Endereço que recebe as mensagens das clientes (recepcionista com IA). */
+export function webhookUrl(): string | null {
+  const secret = process.env.EVOLUTION_WEBHOOK_SECRET;
+  const host = process.env.NEXT_PUBLIC_APP_HOST || process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (!secret || !host) return null;
+  return `https://${host}/api/whatsapp/webhook?t=${encodeURIComponent(secret)}`;
+}
+
+function webhookConfig() {
+  const url = webhookUrl();
+  return url ? { webhook: { enabled: true, url, byEvents: false, base64: false, events: ["MESSAGES_UPSERT"] } } : {};
+}
+
 export async function createInstance(name: string): Promise<{ ok: boolean; qr?: string; error?: string }> {
-  const r = await call<QrPayload>("POST", "/instance/create", { instanceName: name, qrcode: true, integration: "WHATSAPP-BAILEYS" });
+  const r = await call<QrPayload>("POST", "/instance/create", { instanceName: name, qrcode: true, integration: "WHATSAPP-BAILEYS", ...webhookConfig() });
   if (!r.ok && !/already|exist|em uso|in use/i.test(r.error ?? "")) return { ok: false, error: r.error };
   return { ok: true, qr: r.data?.qrcode?.base64 ?? r.data?.base64 };
 }
@@ -71,6 +84,14 @@ export async function getOwnerPhone(name: string): Promise<string | null> {
 export async function sendText(name: string, number: string, text: string): Promise<{ ok: boolean; id?: string; error?: string }> {
   const r = await call<{ key?: { id?: string } }>("POST", `/message/sendText/${encodeURIComponent(name)}`, { number, text, linkPreview: false });
   return r.ok ? { ok: true, id: r.data?.key?.id } : { ok: false, error: r.error };
+}
+
+/** Liga (ou atualiza) o webhook de uma instância que já existe. */
+export async function setWebhook(name: string): Promise<boolean> {
+  const cfg = webhookConfig();
+  if (!("webhook" in cfg)) return false;
+  const r = await call("POST", `/webhook/set/${encodeURIComponent(name)}`, cfg);
+  return r.ok;
 }
 
 export async function logoutInstance(name: string) {

@@ -16,6 +16,7 @@ export const MODULES: Mod[] = [
   { href: "/campanhas", label: "Campanhas", hint: "Convide clientes a voltar", color: "#e2577a", icon: "M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15 9a3 3 0 010 6M18 6a7 7 0 010 12", action: "mkt.campaign.manage" },
   { href: "/vouchers", label: "Vouchers", hint: "Cupons pessoais e genéricos", color: "#d4a24c", icon: "M3 8a2 2 0 002-2h14a2 2 0 002 2v2a2 2 0 000 4v2a2 2 0 00-2 2H5a2 2 0 00-2-2v-2a2 2 0 000-4zM10 6v12", action: "mkt.voucher.manage" },
   { href: "/mensagens", label: "Mensagens", hint: "Fila de envio pelo WhatsApp", color: "#25a26b", icon: "M4 5h16v11H8l-4 4zM8 9h8M8 12h5", anyOf: ["mkt.message.send", "mkt.campaign.manage"] },
+  { href: "/recepcionista", label: "Recepcionista", hint: "Atendimento com IA 24h", color: "#9b4dca", icon: "M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z", action: "core.settings.manage" },
   { href: "/comissoes", label: "Comissões", hint: "Por profissional e período", color: "#3f7fbf", icon: "M12 3v18M16 7H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H7", anyOf: ["commission.read_all", "commission.read_own"] },
   { href: "/relatorios", label: "Relatórios", hint: "Faturamento, ticket e retenção", color: "#5b6fb5", icon: "M4 20V10M10 20V4M16 20v-7M22 20H2", action: "report.read" },
   { href: "/servicos", label: "Serviços", hint: "Preço, tempo e ciclo de retorno", color: "#c25b8a", icon: "M6 6a3 3 0 106 0 3 3 0 00-6 0zM6 18a3 3 0 106 0 3 3 0 00-6 0zM11 8l9 10M11 16l9-10", action: "catalog.service.manage" },

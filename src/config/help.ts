@@ -22,6 +22,16 @@ export const HELP: HelpTopic[] = [
     ],
   },
   {
+    title: "Recepcionista com IA",
+    items: [
+      { q: "O que a recepcionista faz?", a: "Ela conversa com suas clientes pelo chat do seu link de agendamento (e pelo WhatsApp, quando o envio automático estiver conectado). Responde preços, duração, horário de funcionamento, endereço e as regras que você escrever, mostra os horários livres de verdade e cria pedidos de horário.", href: "/recepcionista", cta: "Abrir a Recepcionista" },
+      { q: "Ela confirma horários sozinha?", a: "Não. Ela cria um PEDIDO, igual ao agendamento online, que aparece na Agenda para você confirmar. Ela sempre avisa a cliente que o salão confirma pelo WhatsApp." },
+      { q: "E quando ela não sabe responder?", a: "Remarcação, cancelamento, reclamação, dúvidas de saúde ou pedido de desconto vão para a equipe: a conversa ganha o aviso “equipe”, aparece no Início e você chama a cliente no WhatsApp com um toque. Depois, toque em Resolvido." },
+      { q: "Como ensino as regras do meu salão?", a: "Em Recepcionista → Configurar, no campo “O que ela precisa saber do salão”, escreva estacionamento, formas de pagamento, tolerância de atraso, cuidados antes de procedimentos etc. Preços, serviços e horários ela já pega do sistema." },
+      { q: "Posso testar antes de ligar?", a: "Sim. Use “Testar a conversa” na tela da Recepcionista e fale como se fosse uma cliente. Pedidos feitos no teste entram na Agenda; recuse depois se quiser." },
+    ],
+  },
+  {
     title: "Agenda",
     items: [
       { q: "Como marco um horário?", a: "Toque em + Agendar. 1) Digite as primeiras letras do nome ou do telefone da cliente e escolha na lista. 2) Marque os serviços que ela vai fazer. 3) Para cada serviço, escolha quem atende e um horário livre. 4) Confira o resumo e toque em Confirmar.", href: "/agenda/novo", cta: "Novo agendamento" },

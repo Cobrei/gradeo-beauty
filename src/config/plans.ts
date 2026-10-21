@@ -63,6 +63,7 @@ export const FEATURES: FeatureRow[] = [
   { label: "Campanhas prontas", basic: "2 modelos", pro: "8 modelos", mega: "8 modelos" },
   { label: "Voucher pessoal de uso único", basic: false, pro: true, mega: true },
   { label: "Medição de quem voltou e da receita da campanha", basic: false, pro: true, mega: true },
+  { label: "Recepcionista com IA: tira dúvidas e cria pedidos de horário 24h", basic: false, pro: true, mega: true },
   { label: "Envio automático pelo WhatsApp do salão (QR code)", basic: false, pro: true, mega: true },
   { label: "WhatsApp oficial (API da Meta), sem risco para o número", basic: false, pro: false, mega: "Recomendado" },
 

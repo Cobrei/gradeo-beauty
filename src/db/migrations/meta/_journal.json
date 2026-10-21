@@ -71,6 +71,13 @@
       "when": 1792451681480,
       "tag": "0009_nf_comissao",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792451682480,
+      "tag": "0010_recepcionista_ia",
+      "breakpoints": true
     }
   ]
 }

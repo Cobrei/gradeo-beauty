@@ -8,6 +8,8 @@ import { fromCents, toCents, formatBRL } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
 import { addDays, WEEKDAYS_SHORT, weekdayOf } from "@/lib/time";
 import { formatPhone } from "@/lib/phone";
+import { ReceptionistChat } from "@/components/ui/receptionist-chat";
+import { receptionistAvailable } from "@/modules/marketing/application/receptionist";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -36,11 +38,12 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
   };
   const days = Array.from({ length: 14 }, (_, i) => addDays(today, i)).filter((d) => salon.openingHours[String(weekdayOf(d))]);
   const cats = [...new Set(services.map((s) => s.category))];
+  const aiOn = salon.aiReceptionist && receptionistAvailable();
   const step = sp.ok ? 5 : !service ? 1 : !pro ? 2 : !time ? 3 : 4;
 
   return (
     <main className="min-h-dvh bg-mist" style={brandStyle(salon.brandColor)}>
-      <div className="mx-auto max-w-lg px-4 py-6">
+      <div className={`mx-auto max-w-lg px-4 py-6 ${aiOn ? "pb-24" : ""}`}>
         <header className="mb-5 flex flex-col items-center text-center">
           <SalonMark name={salon.salonName} logo={salon.logoData} color={salon.brandColor} size={salon.logoData ? 72 : 56} showName={false} />
           <h1 className="mt-2 text-2xl font-bold tracking-tight">{salon.salonName}</h1>
@@ -137,6 +140,7 @@ export default async function AgendarPage({ params, searchParams }: { params: Pr
           <PoweredBy label="agendamento por" />
         </footer>
       </div>
+      {aiOn && <ReceptionistChat endpoint={`/api/recepcionista/${slug}`} slug={slug} name={salon.aiName?.trim() || "Bia"} salonName={salon.salonName} />}
     </main>
   );
 }

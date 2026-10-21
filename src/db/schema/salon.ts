@@ -40,6 +40,11 @@ export const salonSettings = pgTable(
     /** Lei do Salão-Parceiro (13.352/2016): mostra CNPJ do profissional e o relatório de cota-parte. */
     partnerMode: boolean("partner_mode").notNull().default(false),
     onboardingDone: boolean("onboarding_done").notNull().default(false),
+    /** Recepcionista com IA: responde clientes no chat do link de agendamento (e no WhatsApp, quando conectado). */
+    aiReceptionist: boolean("ai_receptionist").notNull().default(false),
+    aiName: varchar("ai_name", { length: 40 }),
+    /** Informações extras que a recepcionista pode usar (estacionamento, pagamento, políticas). */
+    aiInstructions: text("ai_instructions"),
   },
   (t) => [uniqueIndex("uq_settings_tenant").on(t.tenantId), uniqueIndex("uq_settings_slug").on(t.slug)],
 );

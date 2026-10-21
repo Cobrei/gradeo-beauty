@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { salonSettings } from "@/db/schema";
 import { assertCan, withTenantRead, withTenantTx, type Actor } from "@/lib/context";
 import { DomainError } from "@/lib/errors";
-import { createInstance, evolutionConfigured, getOwnerPhone, getQr, getState, logoutInstance, type QrState } from "../infrastructure/evolution";
+import { createInstance, evolutionConfigured, getOwnerPhone, getQr, getState, logoutInstance, setWebhook, type QrState } from "../infrastructure/evolution";
 
 export const QR_TERMS_VERSION = "2026-10";
 
@@ -29,6 +29,7 @@ export async function qrStatus(actor: Actor): Promise<{ configured: boolean; ter
   const state = await getState(s.inst);
   if (state === "open" && !s.connectedAt) {
     const phone = await getOwnerPhone(s.inst);
+    await setWebhook(s.inst); // mensagens das clientes chegam para a recepcionista
     await withTenantTx(actor, (tx, ctx) => tx.update(salonSettings).set({ waQrConnectedAt: new Date(), waQrPhone: phone, ...ctx.stampUpdate() }).where(eq(salonSettings.tenantId, actor.tenantId)));
     return { ...base, state, phone };
   }

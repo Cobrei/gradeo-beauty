@@ -35,6 +35,9 @@ const publicCols = {
   reviewUrl: salonSettings.reviewUrl,
   logoData: salonSettings.logoData,
   brandColor: salonSettings.brandColor,
+  aiReceptionist: salonSettings.aiReceptionist,
+  aiName: salonSettings.aiName,
+  aiInstructions: salonSettings.aiInstructions,
 };
 
 export async function getPublicSalon(slug: string) {

@@ -13,6 +13,7 @@ import { APPT_STATUS } from "@/modules/agenda/domain/slots";
 import { formatPhone } from "@/lib/phone";
 import { ModuleGrid } from "@/components/ui/modules";
 import { pendingLowFeedback } from "@/modules/reports/application/feedback";
+import { pendingHumanCount } from "@/modules/marketing/application/receptionist";
 import { markFeedbackHandledAction } from "@/modules/reports/ui/feedback-actions";
 
 export const metadata = { title: "Início" };
@@ -21,7 +22,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
   const actor = await requireActor();
   const sp = await searchParams;
   const today = todayISO();
-  const [d, settings, ob] = await Promise.all([dashboard(actor), getSettings(actor), can(actor, "core.settings.manage") ? onboardingStatus(actor) : null]);
+  const [d, settings, ob, aiPending] = await Promise.all([dashboard(actor), getSettings(actor), can(actor, "core.settings.manage") ? onboardingStatus(actor) : null, can(actor, "core.settings.manage") ? pendingHumanCount(actor) : 0]);
   const canAgenda = can(actor, "agenda.appointment.read") || can(actor, "agenda.appointment.read_own");
   const canCrm = can(actor, "crm.client.read");
   const [agenda, segments, bdays, lowFeedback] = await Promise.all([canAgenda ? dayAgenda(actor, today) : null, canCrm ? segmentSummary(actor) : [], canCrm ? upcomingBirthdays(actor, 7) : [], canCrm ? pendingLowFeedback(actor) : []]);
@@ -132,6 +133,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
           </Card>
         )}
         <div className="space-y-4">
+          {aiPending > 0 && (
+            <Link href="/recepcionista?f=equipe" className="card flex items-center justify-between gap-3 border border-warn/30">
+              <span className="text-sm"><b>{aiPending} {aiPending === 1 ? "cliente aguarda" : "clientes aguardam"} a equipe</b><br /><span className="text-muted">A recepcionista passou para vocês responderem.</span></span>
+              <span className="btn btn-secondary btn-sm">Ver</span>
+            </Link>
+          )}
           {lowFeedback.length > 0 && (
             <Card title="Avaliações para olhar" className="border border-warn/30">
               <ul className="space-y-3">

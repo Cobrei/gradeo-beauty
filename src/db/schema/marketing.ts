@@ -109,3 +109,37 @@ export const automations = pgTable(
   },
   (t) => [uniqueIndex("uq_automation_kind").on(t.tenantId, t.kind)],
 );
+
+/** Conversa da recepcionista com IA (chat do link público ou WhatsApp). */
+export const aiConversations = pgTable(
+  "mkt_ai_conversations",
+  {
+    ...baseCols,
+    channel: varchar("channel", { length: 12 }).notNull(), // WEB, WHATSAPP, TEST
+    externalId: varchar("external_id", { length: 80 }).notNull(), // id da sessão web ou telefone
+    clientName: varchar("client_name", { length: 120 }),
+    clientPhone: varchar("client_phone", { length: 20 }),
+    status: varchar("status", { length: 12 }).notNull().default("OPEN"), // OPEN, HUMAN, CLOSED
+    needsHuman: boolean("needs_human").notNull().default(false),
+    humanReason: text("human_reason"),
+    appointmentId: uuid("appointment_id"),
+    messageCount: integer("message_count").notNull().default(0),
+    tokensIn: integer("tokens_in").notNull().default(0),
+    tokensOut: integer("tokens_out").notNull().default(0),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("uq_ai_conv_ext").on(t.tenantId, t.channel, t.externalId), index("ix_ai_conv_last").on(t.tenantId, t.lastMessageAt)],
+);
+
+/** Mensagens da conversa. `raw` guarda os blocos do modelo (ferramentas) para continuar o contexto. */
+export const aiMessages = pgTable(
+  "mkt_ai_messages",
+  {
+    ...baseCols,
+    conversationId: uuid("conversation_id").notNull(),
+    role: varchar("role", { length: 12 }).notNull(), // user, assistant
+    text: text("text").notNull().default(""),
+    raw: jsonb("raw"),
+  },
+  (t) => [index("ix_ai_msg_conv").on(t.tenantId, t.conversationId, t.createdAt)],
+);
